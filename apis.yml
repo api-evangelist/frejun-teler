@@ -3,7 +3,8 @@ name: FreJun Teler
 description: FreJun Teler is a developer-first programmable voice/telephony API (CPaaS) that handles carriers,
   phone numbers, and real-time audio streaming so developers can connect AI models (STT/LLM/TTS) to live
   phone calls. It offers real-time bidirectional audio over WebSocket (L16/8000 Hz, sub-250ms latency)
-  and programmable SIP trunking, with official Python and Node SDKs.
+  and programmable SIP trunking, with webhook event delivery and official Python (teler) and Node
+  (@frejun/teler) SDKs.
 type: Index
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 url: https://raw.githubusercontent.com/api-evangelist/frejun-teler/refs/heads/main/apis.yml
@@ -21,12 +22,15 @@ tags:
 - conversational AI infrastructure
 apis:
 - name: Teler Voice API
-  description: Programmable voice/telephony API providing real-time bidirectional audio streaming over
-    WebSocket and SIP trunking. Backed by official Python (cpaas-sdk / teler-py) and Node (cpaas-sdk /
-    teler-node) SDKs and a pre-configured Postman collection (sandbox + production). The REST base URL
-    is not publicly disclosed and is reachable only via the SDKs/authenticated docs.
-  humanURL: https://www.frejun.ai/docs/
-  baseURL: https://www.frejun.ai
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  description: Programmable voice/telephony API. Places and controls live voice calls (initiate, play
+    audio, DTMF, transfer, hangup), streams bidirectional call audio to AI agents over a WebSocket media
+    channel, and provisions programmable SIP trunking (trunks, IP ACLs, virtual numbers). REST resources
+    for calls, voice apps, virtual numbers, SIP trunks/calls, webhook events, recordings and secrets use
+    cursor pagination. Served from https://api.frejun.ai and authenticated with an x-api-key header.
+    Backed by official Python (teler) and Node (@frejun/teler) SDKs.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
   tags:
   - programmable voice API
   - voice AI infrastructure
@@ -38,17 +42,94 @@ apis:
   - call automation
   - conversational AI infrastructure
   properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-openapi.json
   - type: Documentation
-    url: https://www.frejun.ai/docs/
-  - type: PostmanCollection
-    url: https://www.frejun.ai/docs/
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+  - type: Overlay
+    url: overlays/frejun-teler-openapi-overlay.yaml
 common:
 - type: Website
   url: https://www.frejun.ai
+- type: DeveloperPortal
+  url: https://frejun.com/docs/teler/
 - type: Documentation
-  url: https://www.frejun.ai/docs/
+  url: https://frejun.com/docs/teler/
+- type: APIReference
+  url: https://api.frejun.ai/redoc
+- type: Blog
+  url: https://frejun.com/teler-blog/
+- type: Pricing
+  url: https://frejun.com/teler/pricing/
+- type: SignUp
+  url: https://platform.frejun.ai/signup
+- type: Login
+  url: https://platform.frejun.ai/login
+- type: TermsOfService
+  url: https://frejun.com/terms/
+- type: PrivacyPolicy
+  url: https://frejun.com/privacy-policy/
+- type: GitHubOrganization
+  url: https://github.com/frejun-tech
+- type: StatusPage
+  url: https://frejun.statuspage.io
 - type: LLMsTxt
   url: https://www.frejun.ai/llms.txt
+- type: WellKnown
+  url: well-known/frejun-teler-well-known.yml
+- type: Authentication
+  url: authentication/frejun-teler-authentication.yml
+- type: DomainSecurity
+  url: security/frejun-teler-domain-security.yml
+- type: Conventions
+  url: conventions/frejun-teler-conventions.yml
+- type: Lifecycle
+  url: lifecycle/frejun-teler-lifecycle.yml
+- type: Deprecation
+  url: lifecycle/frejun-teler-lifecycle.yml
+- type: Conformance
+  url: conformance/frejun-teler-conformance.yml
+- type: MCPServer
+  url: mcp/frejun-teler-mcp.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Packages
+  url: packages/frejun-teler-packages.yml
+- type: SDKs
+  url: packages/frejun-teler-packages.yml
+- type: Components
+  url: components/frejun-teler-components.yml
+- type: Webhooks
+  url: asyncapi/frejun-teler-webhooks.yml
+- type: DataModel
+  url: data-model/frejun-teler-data-model.yml
+- type: ErrorCatalog
+  url: errors/frejun-teler-problem-types.yml
+- type: Overlay
+  url: overlays/frejun-teler-openapi-overlay.yaml
+- type: Sandbox
+  url: sandbox/frejun-teler-sandbox.yml
+- type: RateLimits
+  url: rate-limits/frejun-teler-rate-limits.yml
+- type: Plans
+  url: plans/frejun-teler-plans-pricing.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
+x-enrichment:
+  date: '2026-09-15'
+  status: enriched
+  artifacts_added: 24
+  pass: local-v3

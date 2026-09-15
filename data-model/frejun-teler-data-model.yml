@@ -1,0 +1,59 @@
+aid: frejun-teler
+type: DataModel
+generated: '2026-09-15'
+method: derived
+source: Derived from $ref links and *_id reference fields in the Teler OpenAPI (api.frejun.ai/openapi.json).
+entities:
+- name: CallSession
+  schema: CallSessionResponse
+  key: id
+  refs: [account_id, voice_app_id]
+- name: CallLeg
+  schema: CallLegResponse
+  key: id
+  refs: [call_session_id, parent_leg_id]
+- name: VoiceApp
+  schema: CallAppResponse
+  key: id
+  refs: [secret_id, account_id]
+- name: VirtualNumber
+  schema: VNResponse
+  key: id
+- name: SipTrunk
+  schema: SipTrunkResponse
+  key: id
+  refs: [account_id, ip_acl_id, secret_id]
+- name: SipCall
+  schema: SipCallResponse
+  key: id
+  refs: [account_id, sip_trunk_id]
+- name: IpAcl
+  schema: IpAclResponse
+  key: id
+- name: WebhookEvent
+  schema: WebhookEventResponse
+  key: id
+  refs: [account_id, call_id, sip_trunk_id, leg_id]
+- name: Recording
+  key: recording_id
+- name: Secret
+  schema: SecretResponse
+  key: id
+relationships:
+- {from: CallSession, type: belongs_to, to: VoiceApp, via: voice_app_id}
+- {from: CallSession, type: has_many, to: CallLeg, via: call_session_id}
+- {from: CallLeg, type: belongs_to, to: CallSession, via: call_session_id}
+- {from: CallLeg, type: belongs_to, to: CallLeg, via: parent_leg_id, note: self-reference (transfer/child legs)}
+- {from: VoiceApp, type: belongs_to, to: Secret, via: secret_id}
+- {from: VoiceApp, type: has_many, to: VirtualNumber, via: '/voice/apps/{id}/virtual-numbers'}
+- {from: SipTrunk, type: belongs_to, to: IpAcl, via: ip_acl_id}
+- {from: SipTrunk, type: belongs_to, to: Secret, via: secret_id}
+- {from: SipTrunk, type: has_many, to: VirtualNumber, via: '/sip/trunks/{id}/virtual-numbers'}
+- {from: SipCall, type: belongs_to, to: SipTrunk, via: sip_trunk_id}
+- {from: WebhookEvent, type: belongs_to, to: CallSession, via: call_id}
+- {from: WebhookEvent, type: belongs_to, to: SipTrunk, via: sip_trunk_id}
+identifier_prefixes:
+  note: >-
+    The spec references prefixed identifiers (e.g. pb_ for playback ids); a full
+    id-prefix table lives in the docs "resource identifiers" guide (JS-rendered,
+    not crawler-readable).

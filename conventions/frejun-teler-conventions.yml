@@ -1,0 +1,86 @@
+aid: frejun-teler
+type: Conventions
+generated: '2026-09-15'
+method: derived
+source: |
+  Derived from the Teler OpenAPI (api.frejun.ai/openapi.json). The spec's
+  info.description names guides for resource identifiers, pagination, errors,
+  idempotency, webhooks and SDKs at frejun.com/docs/teler/ (JS-rendered, not
+  crawler-readable), so header-level idempotency could not be confirmed there.
+authentication:
+  style: api-key
+  header: x-api-key
+  scope: account-scoped, full access
+  note: A missing or invalid key returns 403. Keys are rotated from the Teler dashboard.
+pagination:
+  style: cursor
+  request_params:
+    cursor_after: Fetch the next (older) page — pass the previous response's next_cursor.
+    cursor_before: Fetch the previous (newer) page — pass the previous response's previous_cursor.
+    limit: Page size.
+  response_fields:
+    data: The page of results (newest first).
+    next_cursor: Cursor for the next/older page; null on the last page.
+    previous_cursor: Cursor for the previous/newer page; null on the first page.
+  common_filters: [created_after, created_before, occurred_after, status, state, search]
+idempotency:
+  coverage: none
+  scope: []
+  note: >-
+    The spec declares NO Idempotency-Key request header on any mutating
+    operation. info.description lists "idempotency" as a documented guide topic
+    at frejun.com/docs/teler/, but that docs app is JS-rendered and the header
+    could not be confirmed. Control operations return a MutationAccepted body
+    with a request_id that the docs say to "reuse to correlate retries and
+    webhooks" — a correlation identifier, not a replay-protection key. Recorded
+    as none rather than credited on an unverifiable prose reference.
+request_id:
+  mechanism: response-body
+  field: request_id
+  note: >-
+    202-Accepted control operations (play, transfer, DTMF, mute, hangup) return
+    request_id (and playback_id/transfer_id where relevant) to correlate the
+    async result delivered over webhooks.
+versioning:
+  style: uri-path
+  current: v1
+  path_prefix: /api/v1
+error_envelope:
+  shape: '{success:false, message, code?, type?}'
+  format: custom-json (not RFC 9457)
+  cross_reference: errors/frejun-teler-problem-types.yml
+async_operations:
+  note: >-
+    Call-control mutations are asynchronous — they return 202 Accepted with a
+    request_id and deliver the outcome via webhook events (see
+    asyncapi/frejun-teler-webhooks.yml). Voice/SIP calls are also driven by a
+    real-time bidirectional audio WebSocket (media streaming) separate from the
+    REST control plane.
+rate_limit_signaling:
+  note: >-
+    No rate-limit response headers (X-RateLimit-*, RateLimit-*, Retry-After) and
+    no 429 responses are declared in the spec. See rate-limits/frejun-teler-rate-limits.yml.
+reversibility:
+  grade: documented
+  na: false
+  note: >-
+    Teler is a real-time voice control plane. Several write operations have an
+    explicit inverse, but no operation documents a stated reversal WINDOW, so the
+    dimension grades `documented`, not `verified`.
+  surfaces:
+  - operation: assign_virtual_numbers
+    reversal: unassign_virtual_numbers
+    window: none stated
+  - operation: create_sip_trunk / create_ip_acl / create_voice_app / create_secret
+    reversal: delete_sip_trunk / delete_ip_acl / delete_voice_app / delete_secret
+    window: none stated
+    note: Hard delete; no documented restore/undo path.
+  - operation: initiate_call
+    reversal: hangup_call
+    window: while the call is live (409 call_not_live once it ends)
+    note: Terminates the live call; it does not undo a placed call.
+  - operation: redeliver_webhook_event
+    reversal: n/a
+    window: >-
+      Redelivery itself is time-bounded — events older than the redelivery
+      window return 410 Gone — but this is replay, not reversal.

@@ -1,0 +1,53 @@
+aid: frejun-teler
+type: ErrorCatalog
+generated: '2026-09-15'
+method: derived
+source: |
+  Derived from the 4xx/5xx responses in the Teler OpenAPI (api.frejun.ai/openapi.json),
+  including the per-response application/json examples that carry stable `code`
+  and `type` values.
+format: custom-json
+envelope:
+  schema: ErrorResponse
+  fields:
+    success: Always false on an error response.
+    message: Human-readable description; safe to show a user.
+    code: >-
+      Stable, machine-readable error code present on business-rule errors
+      (e.g. transfer_in_progress). Branch on this, not on message.
+    type: Error category (e.g. invalid_state); present on some conflict errors.
+  note: >-
+    Not RFC 9457 (no application/problem+json). Teler uses a custom
+    {success,message,code,type} envelope. Validation errors (422) use FastAPI's
+    HTTPValidationError shape ({detail:[{loc,msg,type}]}).
+status_codes:
+- status: 400
+  meaning: Bad request — invalid pagination cursor, unprovisioned from_number, or missing required target field.
+  codes:
+  - {code: from_number_not_provisioned, message: The from_number is not provisioned for outbound calls.}
+  - {code: invalid_target, message: "target.number is required when kind='pstn'."}
+  - {code: null, message: The pagination cursor is invalid or has expired.}
+- status: 403
+  meaning: Missing or invalid API key, or no permission for the resource. A missing/invalid x-api-key always returns 403.
+- status: 404
+  meaning: Resource not found (call, recording, voice app, trunk, secret, etc.).
+- status: 409
+  meaning: Conflict — the resource is in a state that rejects the operation.
+  codes:
+  - {code: call_not_live, type: invalid_state, message: The call is not in a state that accepts controls.}
+  - {code: transfer_in_progress, type: invalid_state, message: A transfer is already in progress for this call.}
+  - {code: null, message: This event cannot be redelivered in its current state.}
+- status: 410
+  meaning: Gone — the webhook event is older than the redelivery window and cannot be replayed.
+- status: 422
+  meaning: Unprocessable entity — request body/params failed validation (FastAPI HTTPValidationError detail[]).
+- status: 502
+  meaning: Upstream/carrier error — the call could not be initiated; retry.
+- status: 503
+  meaning: Service unavailable — the operation (e.g. transfer) could not be started; retry.
+- status: 504
+  meaning: Timeout — the call could not be initiated in time; retry.
+notes: |
+  The docs (frejun.com/docs/teler/) reference an errors guide that could enrich
+  titles/remediation, but it is a JS-rendered docs app not readable by crawler;
+  the codes above are read verbatim from the spec's response examples.

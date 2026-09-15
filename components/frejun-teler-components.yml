@@ -1,0 +1,40 @@
+aid: frejun-teler
+type: Components
+generated: '2026-09-15'
+method: searched
+source: First-party client/softphone repositories under github.com/frejun-tech.
+component_families:
+- family: Softphone SDKs
+  description: >-
+    Embeddable, in-app softphone clients that put a dialer/call surface inside a
+    host web or mobile application (distinct from the server-side API SDKs in
+    packages/).
+  components:
+  - name: react-native-softphone-sdk
+    platform: react-native
+    language: typescript
+    repository: https://github.com/frejun-tech/react-native-softphone-sdk
+    official: true
+  - name: android-softphone-sdk
+    platform: android
+    repository: https://github.com/frejun-tech/android-softphone-sdk
+    official: true
+  - name: frejun-softphone-wrapper
+    platform: web
+    language: javascript
+    repository: https://github.com/frejun-tech/frejun-softphone-wrapper
+    official: true
+- family: Auth SDK
+  components:
+  - name: frejun-oauth-sdk
+    platform: web
+    language: typescript
+    repository: https://github.com/frejun-tech/frejun-oauth-sdk
+    official: true
+    description: SDK to implement FreJun OAuth in a JS/TS frontend/backend.
+notes: |
+  The FreJun GitHub org also publishes numerous reference integration bridges
+  (Teler <-> OpenAI Realtime, Gemini Live, Deepgram, ElevenLabs, Ultravox,
+  Sarvam, Devnagri, VAPI, LiveKit) in both Python and Node; these are example
+  apps, not embeddable UI components, so they are noted but not listed as
+  components.

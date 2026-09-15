@@ -1,0 +1,18 @@
+aid: frejun-teler
+type: RateLimits
+generated: '2026-09-15'
+method: searched
+source: Teler OpenAPI (api.frejun.ai/openapi.json) and public docs.
+limit_count: 0
+limits: []
+response_headers:
+  observed: []
+  note: >-
+    No rate-limit response headers (X-RateLimit-*, RateLimit-*, Retry-After) are
+    declared in the spec, and no 429 Too Many Requests response is defined on any
+    operation.
+note: >-
+  No published rate limits were found on public surfaces, and none are encoded in
+  the machine-readable contract. Recorded as an honest zero. A limits/quotas
+  guide may exist in the JS-rendered docs (frejun.com/docs/teler/) but was not
+  crawler-readable.

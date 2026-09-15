@@ -1,0 +1,15 @@
+aid: frejun-teler
+type: AgentSkill
+generated: '2026-09-15'
+method: generated
+source: >-
+  Generated from real operationIds in the Teler OpenAPI (api.frejun.ai/openapi.json).
+  No provider-published skills/AGENTS.md was found.
+api: Teler Voice API
+skills:
+- name: place-and-control-a-voice-call
+  file: place-and-control-a-voice-call.md
+  operations: [initiate_call, retrieve_voice_call, play_audio, send_dtmf, transfer_call, hangup_call, list_webhook_events]
+- name: provision-sip-trunking
+  file: provision-sip-trunking.md
+  operations: [create_ip_acl, create_sip_trunk, list_sip_trunk_virtual_numbers, assign_virtual_numbers, list_sip_calls]

@@ -1,0 +1,43 @@
+aid: frejun-teler
+type: Webhooks
+generated: '2026-09-15'
+method: derived
+source: |
+  Derived from the Events surface in the Teler OpenAPI (api.frejun.ai/openapi.json).
+  No standalone AsyncAPI document is published (asyncapi is N/A, not fabricated).
+surface:
+  delivery: HTTP POST to a customer-configured endpoint (webhook).
+  event_log_api:
+    list: GET /api/v1/events
+    retrieve: GET /api/v1/events/{event_id}
+    redeliver: POST /api/v1/events/{event_id}/redeliver
+  note: >-
+    Teler persists every webhook event and exposes a queryable event log plus a
+    redelivery endpoint. Redelivery is time-bounded — events older than the
+    redelivery window return 410 Gone.
+event_schema:
+  id_prefix: evt_
+  fields:
+    type: Event type string, e.g. `call.completed` (full catalog in the webhook events reference, JS-rendered docs).
+    api_version: API version the payload is serialized against.
+    payload: Full event payload object (open shape).
+    occurred_at: When the underlying event occurred.
+    call_id: Related call (cs_ prefix) when call-scoped.
+    sip_trunk_id: Related SIP trunk (st_ prefix) when applicable.
+    leg_id: Related call leg when applicable.
+  delivery_tracking:
+    delivery_status: [pending, delivered, failed_permanent, backfill_skipped]
+    fields: [attempt_count, last_attempt_at, last_status_code, last_error, delivered_at]
+event_types:
+  known:
+  - call.completed
+  note: >-
+    Only `call.completed` appears verbatim in the spec (as the type example).
+    The full event-type catalog lives in the docs webhook events reference and
+    is NOT enumerated in the machine-readable contract, so no other type names
+    are asserted here.
+realtime_media:
+  note: >-
+    Separate from webhooks, Teler streams live bidirectional call audio to
+    customer AI agents over a WebSocket media-streaming channel (L16/8000 Hz);
+    this is the real-time transport, not an event/webhook surface.

@@ -1,0 +1,34 @@
+aid: frejun-teler
+type: Lifecycle
+generated: '2026-09-15'
+method: searched
+source: |
+  Derived from the Teler OpenAPI (api.frejun.ai/openapi.json) and confirmed the
+  status page by probe (frejun.statuspage.io -> 200, Atlassian Statuspage).
+versioning:
+  style: uri-path
+  current: v1
+  path_prefix: /api/v1
+  note: Version is carried in the URL path (/api/v1/...).
+deprecation:
+  policy_documented: partial
+  headers:
+    sunset: not declared in spec
+    deprecation: not declared in spec
+  deprecated_operations:
+  - operationId: initiate_call_legacy
+    path: /api/v1/calls/initiate
+    method: post
+    replacement: initiate_call (POST /api/v1/voice/calls/initiate)
+    marker: 'OpenAPI deprecated:true flag; tagged "Voice / Calls (legacy)".'
+  note: >-
+    The spec marks one operation deprecated and provides a current replacement,
+    but declares no RFC 8594 Sunset/Deprecation response headers. The API also
+    uses HTTP 410 Gone for expired webhook redelivery windows.
+status_page:
+  url: https://frejun.statuspage.io
+  provider: Atlassian Statuspage
+  status: probed-200
+sla:
+  documented: unknown
+  note: No machine-readable SLA found on public surfaces.

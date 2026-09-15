@@ -1,0 +1,24 @@
+aid: frejun-teler
+type: Authentication
+generated: '2026-09-15'
+method: searched
+source: openapi/frejun-teler-openapi.json + Teler OpenAPI info.description (api.frejun.ai/openapi.json)
+docs: https://frejun.com/docs/teler/
+notes: >-
+  Single scheme: a secret, account-scoped API key sent in the x-api-key request
+  header. Keys grant full account access (treat like a password, keep
+  server-side, rotate from the Teler dashboard at platform.frejun.ai). A missing
+  or invalid key returns HTTP 403. No OAuth2/OIDC on the developer API.
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: ApiKeyAuth
+  type: apiKey
+  in: header
+  parameter: x-api-key
+  description: Your secret account API key. Create one in the Teler dashboard.
+  sources:
+  - openapi/frejun-teler-openapi.json

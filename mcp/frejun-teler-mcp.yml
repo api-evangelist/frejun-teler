@@ -1,0 +1,36 @@
+aid: frejun-teler
+type: MCPServer
+generated: '2026-09-15'
+method: derived
+source: |
+  No official MCP server for the Teler developer API was found (searched the
+  GitHub org, docs, and probed api.frejun.ai/mcp -> 404). A candidate tool list
+  is derived from the OpenAPI operations.
+deployment:
+  mode: none
+  endpoint: ''
+  install: ''
+  package: ''
+  auth: api-key
+  verified: derived
+candidate_tools:
+- {tool: initiate_call, rest: initiate_call, category: Voice / Calls}
+- {tool: list_voice_calls, rest: list_voice_calls, category: Voice / Calls}
+- {tool: retrieve_voice_call, rest: retrieve_voice_call, category: Voice / Calls}
+- {tool: hangup_call, rest: hangup_call, category: Voice / Call Controls}
+- {tool: transfer_call, rest: transfer_call, category: Voice / Operations}
+- {tool: play_audio, rest: play_audio, category: Voice / Call Controls}
+- {tool: send_dtmf, rest: send_dtmf, category: Voice / Call Controls}
+- {tool: mute_call, rest: mute_call, category: Voice / Call Controls}
+- {tool: create_voice_app, rest: create_voice_app, category: Voice / Apps}
+- {tool: list_virtual_numbers, rest: list_virtual_numbers, category: Virtual Numbers}
+- {tool: assign_virtual_numbers, rest: assign_virtual_numbers, category: Virtual Numbers}
+- {tool: create_sip_trunk, rest: create_sip_trunk, category: SIP / Trunks}
+- {tool: list_webhook_events, rest: list_webhook_events, category: Events}
+- {tool: get_recording_download_url, rest: get_recording_download_url, category: Utilities}
+notes: |
+  A separate, UNRELATED MCP server exists on the WordPress marketing site
+  frejun.com (the "Royal MCP" plugin at https://frejun.com/mcp) — it returned
+  401 Unauthorized to an anonymous tools/list and advertises scopes [mcp:full]
+  over site content, not the Teler voice API. It is NOT wired here as a Teler
+  agent surface. mode is `none`: no official MCP server ships for the Teler API.

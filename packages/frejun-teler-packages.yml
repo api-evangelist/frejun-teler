@@ -1,0 +1,42 @@
+aid: frejun-teler
+type: Packages
+generated: '2026-09-15'
+method: searched
+source: |
+  First-party SDK repositories under the FreJun GitHub org (github.com/frejun-tech),
+  cross-checked against the PyPI and npm registry metadata endpoints. The OpenAPI
+  info.description names "the official Python and Node.js SDKs".
+packages:
+- name: teler
+  ecosystem: pypi
+  registry: pypi
+  url: https://pypi.org/project/teler/
+  repository: https://github.com/frejun-tech/teler-py
+  official: true
+  language: python
+  version: 0.2.2
+  published: '2026-07-24'
+  description: >-
+    Official Python SDK — a lightweight, developer-friendly abstraction over the
+    FreJun Teler REST API (client.calls.create(...), sync + async clients).
+- name: '@frejun/teler'
+  ecosystem: npm
+  registry: npm
+  url: https://www.npmjs.com/package/@frejun/teler
+  repository: https://github.com/frejun-tech/teler-node
+  official: true
+  language: typescript
+  version: 1.0.10
+  published: '2026-07-20'
+  description: >-
+    Official Node/TypeScript SDK ("Teler Node SDK") — a lightweight abstraction
+    over the FreJun Teler REST API.
+notes: |
+  The provider also publishes softphone client SDKs (react-native-softphone-sdk,
+  android-softphone-sdk, frejun-softphone-wrapper) and many reference
+  integration bridges (teler-openai-bridge, teler-gemini-bridge,
+  teler-deepgram-bridge, teler-elevenlabs-bridge, teler-vapi-bridge, etc.) in
+  the same GitHub org; the softphone clients are captured as Components, and the
+  bridges are example integrations rather than distributable client libraries.
+  Note: an earlier round guessed the SDK package names as "cpaas-sdk"; the real
+  published names are `teler` (PyPI) and `@frejun/teler` (npm).

@@ -1,0 +1,38 @@
+aid: frejun-teler
+type: Conformance
+generated: '2026-09-15'
+method: derived
+source: Assessed against the Teler OpenAPI (api.frejun.ai/openapi.json) and public docs signals.
+conformance:
+- id: oauth2
+  conforms: false
+  evidence: The API authenticates with an x-api-key header; no OAuth2 securityScheme is declared.
+- id: oidc
+  conforms: false
+  evidence: No OpenID Connect surface on the API.
+- id: rfc9457
+  conforms: false
+  evidence: >-
+    Errors use a custom {success,message,code,type} JSON envelope, not
+    application/problem+json / RFC 9457.
+- id: rfc8594-deprecation
+  conforms: false
+  evidence: One operation is marked deprecated in the spec, but no Sunset/Deprecation response headers are declared.
+- id: cursor-pagination
+  conforms: true
+  evidence: >-
+    All list endpoints use consistent cursor pagination
+    (cursor_after/cursor_before/limit; next_cursor/previous_cursor/has_more).
+- id: sip
+  conforms: true
+  evidence: >-
+    The provider exposes programmable SIP trunking (SIP / Trunks, SIP / Calls,
+    SIP IP ACLs) — SIP is the telecom signaling protocol, exercised via the REST
+    control plane. This is a protocol capability, not a machine-readable
+    domain-standard contract signature.
+domain_standard:
+  present: false
+  note: >-
+    No domain-standard signature (SCIM URN, OData $metadata, OpenRTB, HL7/X12,
+    ISO 20022, etc.) is declared in the contract. The CPaaS/voice market has no
+    single REST domain standard, so none is asserted (reward-only dimension).

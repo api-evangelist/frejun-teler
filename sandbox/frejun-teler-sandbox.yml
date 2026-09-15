@@ -1,0 +1,24 @@
+aid: frejun-teler
+type: Sandbox
+generated: '2026-09-15'
+method: searched
+source: |
+  Teler signup/pricing pages (frejun.com/teler/, platform.frejun.ai/signup) and
+  the OpenAPI description. Values recorded verbatim; none invented.
+sandbox:
+  available: true
+  prototyping_credits:
+    amount: 25000
+    unit: calling credits
+    note: Free prototyping credits granted on signup; no credit card required.
+  environments:
+    note: >-
+      The provider's Postman collection is described as covering both sandbox and
+      production. The public spec declares a single production server
+      (https://api.frejun.ai); a distinct sandbox base URL was not found on
+      public surfaces.
+  test_values:
+    note: >-
+      No published test phone numbers, test cards, or fixture tokens found — Teler
+      is a voice/telephony API rather than a payments API, and testing is done
+      with real numbers against prototyping credits.

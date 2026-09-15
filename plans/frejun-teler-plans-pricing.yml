@@ -1,0 +1,25 @@
+aid: frejun-teler
+type: Plans
+generated: '2026-09-15'
+method: searched
+source: https://frejun.com/teler/pricing/
+plan_count: 0
+pricing_model: usage-based
+plans: []
+signals:
+  free_credits:
+    amount: 25000
+    unit: calling credits
+    note: Granted on signup for prototyping; no credit card required.
+  usage:
+    note: >-
+      Teler pricing is transparent carrier-rate / usage-based — charged on
+      inbound calls, outbound minutes, and additional virtual numbers by region
+      — rather than fixed published subscription tiers. The pricing page states
+      this model but does not enumerate priced tiers with quotas for the Teler
+      developer API (the fixed $14.49 / $16.99 per-user tiers on the same page
+      belong to the separate FreJun Dialer product, not Teler).
+note: >-
+  plan_count is 0 because no fixed, quota-bearing subscription tiers are
+  published for the Teler API — pricing is usage/carrier-rate based with free
+  prototyping credits. Recorded as an honest zero with the model explained.

@@ -1,0 +1,26 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enrichment overlay for Teler API
+  version: 1.0.0
+extends: ../openapi/frejun-teler-openapi.json
+x-generated: '2026-09-15'
+x-source: >-
+  Non-destructive overlay capturing API Evangelist enrichment metadata for the
+  Teler API. Does not mutate the original spec.
+actions:
+- target: $.info
+  update:
+    x-apievangelist-enriched: '2026-09-15'
+    x-provider: FreJun Teler
+    x-auth-style: api-key (x-api-key header)
+    x-pagination: cursor (cursor_after/cursor_before/limit)
+    x-error-format: custom-json ({success,message,code,type}) — not RFC 9457
+    x-webhooks: true
+    x-realtime-media: WebSocket bidirectional audio (L16/8000 Hz)
+    x-sdks:
+    - {ecosystem: pypi, name: teler}
+    - {ecosystem: npm, name: '@frejun/teler'}
+- target: "$.paths['/api/v1/calls/initiate'].post"
+  update:
+    x-deprecation-note: >-
+      Legacy call initiation — use initiate_call (POST /api/v1/voice/calls/initiate).

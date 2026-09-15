@@ -1,0 +1,79 @@
+aid: frejun-teler
+type: WellKnown
+generated: '2026-09-15'
+method: probed
+source: |
+  Probed /.well-known/ paths on every host the record knows: the registrable
+  domains (frejun.ai + www, frejun.com), the API host (api.frejun.ai), and the
+  dashboard/console host (platform.frejun.ai).
+hosts:
+- host: frejun.com
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: frejun-teler-oauth-authorization-server.json
+    content_type: application/json
+    note: >-
+      Real JSON OAuth 2.0 authorization-server metadata, but it belongs to the
+      WordPress marketing site's "Royal MCP" plugin (issuer https://frejun.com,
+      scopes_supported [mcp:full], service_documentation royalplugins.com/support/royal-mcp/),
+      NOT to the Teler developer API. The Teler API authenticates with an
+      x-api-key header and publishes no OAuth server.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: frejun-teler-oauth-protected-resource.json
+    content_type: application/json
+    note: >-
+      RFC 9728 protected-resource metadata for the same frejun.com Royal MCP
+      surface (resource https://frejun.com, scopes [mcp:full]).
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: api.frejun.ai
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+- host: platform.frejun.ai
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    content_type: text/html
+    note: >-
+      SPA catch-all — the dashboard returns its HTML app shell (200) for EVERY
+      /.well-known/* path, including agent-card.json and api-catalog. These are
+      not real documents and are recorded as misses.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: text/html
+    note: SPA shell, not a document.
+- host: www.frejun.ai
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+notes: |
+  Only real, non-SPA 200 documents are the two OAuth metadata files on
+  frejun.com, and both describe the marketing site's Royal MCP WordPress plugin
+  rather than the Teler API. A WellKnown pointer is emitted because the provider
+  genuinely serves these documents, but the note records that they are not the
+  developer-API auth surface.
