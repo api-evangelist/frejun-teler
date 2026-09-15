@@ -1,0 +1,54 @@
+aid: frejun-teler
+name: FreJun Teler
+description: FreJun Teler is a developer-first programmable voice/telephony API (CPaaS) that handles carriers,
+  phone numbers, and real-time audio streaming so developers can connect AI models (STT/LLM/TTS) to live
+  phone calls. It offers real-time bidirectional audio over WebSocket (L16/8000 Hz, sub-250ms latency)
+  and programmable SIP trunking, with official Python and Node SDKs.
+type: Index
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+url: https://raw.githubusercontent.com/api-evangelist/frejun-teler/refs/heads/main/apis.yml
+created: '2026-09-15'
+modified: '2026-09-15'
+tags:
+- programmable voice API
+- voice AI infrastructure
+- CPaaS
+- SIP trunking
+- telephony API
+- real-time media streaming
+- WebSocket audio
+- call automation
+- conversational AI infrastructure
+apis:
+- name: Teler Voice API
+  description: Programmable voice/telephony API providing real-time bidirectional audio streaming over
+    WebSocket and SIP trunking. Backed by official Python (cpaas-sdk / teler-py) and Node (cpaas-sdk /
+    teler-node) SDKs and a pre-configured Postman collection (sandbox + production). The REST base URL
+    is not publicly disclosed and is reachable only via the SDKs/authenticated docs.
+  humanURL: https://www.frejun.ai/docs/
+  baseURL: https://www.frejun.ai
+  tags:
+  - programmable voice API
+  - voice AI infrastructure
+  - CPaaS
+  - SIP trunking
+  - telephony API
+  - real-time media streaming
+  - WebSocket audio
+  - call automation
+  - conversational AI infrastructure
+  properties:
+  - type: Documentation
+    url: https://www.frejun.ai/docs/
+  - type: PostmanCollection
+    url: https://www.frejun.ai/docs/
+common:
+- type: Website
+  url: https://www.frejun.ai
+- type: Documentation
+  url: https://www.frejun.ai/docs/
+- type: LLMsTxt
+  url: https://www.frejun.ai/llms.txt
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
