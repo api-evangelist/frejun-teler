@@ -14,6 +14,16 @@ tags:
 - programmable voice API
 - voice AI infrastructure
 - CPaaS
+- SIP Trunking
+- telephony API
+- real-time media streaming
+- WebSocket audio
+- Call Automation
+- conversational AI infrastructure
+tags_raw:
+- programmable voice API
+- voice AI infrastructure
+- CPaaS
 - SIP trunking
 - telephony API
 - real-time media streaming
@@ -21,29 +31,17 @@ tags:
 - call automation
 - conversational AI infrastructure
 apis:
-- name: Teler Voice API
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-  description: Programmable voice/telephony API. Places and controls live voice calls (initiate, play
-    audio, DTMF, transfer, hangup), streams bidirectional call audio to AI agents over a WebSocket media
-    channel, and provisions programmable SIP trunking (trunks, IP ACLs, virtual numbers). REST resources
-    for calls, voice apps, virtual numbers, SIP trunks/calls, webhook events, recordings and secrets use
-    cursor pagination. Served from https://api.frejun.ai and authenticated with an x-api-key header.
-    Backed by official Python (teler) and Node (@frejun/teler) SDKs.
+- aid: frejun-teler:frejun-teler-events-api
+  name: FreJun Teler Events API
+  description: >-
+    Inspect the webhook events Teler generated for your account and redeliver any that your endpoint missed.
   humanURL: https://frejun.com/docs/teler/
   baseURL: https://api.frejun.ai
   tags:
-  - programmable voice API
-  - voice AI infrastructure
-  - CPaaS
-  - SIP trunking
-  - telephony API
-  - real-time media streaming
-  - WebSocket audio
-  - call automation
-  - conversational AI infrastructure
+  - Events
   properties:
   - type: OpenAPI
-    url: openapi/frejun-teler-openapi.json
+    url: openapi/frejun-teler-events-api-openapi.yml
   - type: Documentation
     url: https://frejun.com/docs/teler/
   - type: APIReference
@@ -58,8 +56,287 @@ apis:
     url: data-model/frejun-teler-data-model.yml
   - type: Webhooks
     url: asyncapi/frejun-teler-webhooks.yml
-  - type: Overlay
-    url: overlays/frejun-teler-openapi-overlay.yaml
+- aid: frejun-teler:frejun-teler-secrets-api
+  name: FreJun Teler Secrets API
+  description: >-
+    Manage secret API keys used for authenticating requests. Create, rotate, and delete secrets — rotate
+    periodically and keep them server-side.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Secrets
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-secrets-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-sip-calls-api
+  name: FreJun Teler SIP / Calls API
+  description: Read calls that arrived or left over your SIP trunks (`st_`).
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - SIP / Calls
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-sip-calls-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-sip-ip-access-control-lists-api
+  name: FreJun Teler SIP / IP Access Control Lists API
+  description: >-
+    Named sets of source IPs or CIDR networks (`acl_`) that SIP trunks with `authentication_type: IP`
+    authorise against. Attach one to many trunks and update it in a single place.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - SIP / IP Access Control Lists
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-sip-ip-access-control-lists-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-sip-trunks-api
+  name: FreJun Teler SIP / Trunks API
+  description: >-
+    SIP trunks connect Teler to your upstream carrier or PBX. Create, configure, and manage your trunks,
+    or inspect which virtual numbers are assigned to each one.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - SIP / Trunks
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-sip-trunks-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-utilities-api
+  name: FreJun Teler Utilities API
+  description: Fetch short-lived, signed download URLs for call recordings.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Utilities
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-utilities-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-virtual-numbers-api
+  name: FreJun Teler Virtual Numbers API
+  description: >-
+    Phone numbers that Teler provisions for your account. List, assign to a voice app or SIP trunk, unassign,
+    or update individual numbers.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Virtual Numbers
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-virtual-numbers-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-voice-apps-api
+  name: FreJun Teler Voice / Apps API
+  description: >-
+    Voice apps are the configuration context for calls — they define webhook URLs, flows, and channel
+    limits. Create and manage your voice apps here.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Voice / Apps
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-voice-apps-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-voice-call-controls-api
+  name: FreJun Teler Voice / Call Controls API
+  description: >-
+    Act on a live call in real time — hang up, mute, send DTMF, or play audio. These actions are accepted
+    asynchronously and return `202` with a `request_id`.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Voice / Call Controls
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-voice-call-controls-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-voice-calls-api
+  name: FreJun Teler Voice / Calls API
+  description: >-
+    Place outbound calls and read call state. A **call** (`cs_`) is the top-level session; each party
+    on it is a **leg** (`cl_`).
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Voice / Calls
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-voice-calls-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-voice-calls-legacy-api
+  name: FreJun Teler Voice / Calls (legacy) API
+  description: >-
+    Deprecated endpoints kept for backwards compatibility. Prefer the **Voice / Calls** endpoints for
+    all new integrations.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Voice / Calls (legacy)
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-voice-calls-legacy-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
+- aid: frejun-teler:frejun-teler-voice-operations-api
+  name: FreJun Teler Voice / Operations API
+  description: >-
+    Higher-level, multi-step operations on a live call, such as transferring it to a new destination.
+  humanURL: https://frejun.com/docs/teler/
+  baseURL: https://api.frejun.ai
+  tags:
+  - Voice / Operations
+  properties:
+  - type: OpenAPI
+    url: openapi/frejun-teler-voice-operations-api-openapi.yml
+  - type: Documentation
+    url: https://frejun.com/docs/teler/
+  - type: APIReference
+    url: https://api.frejun.ai/redoc
+  - type: Authentication
+    url: authentication/frejun-teler-authentication.yml
+  - type: Conventions
+    url: conventions/frejun-teler-conventions.yml
+  - type: ErrorCatalog
+    url: errors/frejun-teler-problem-types.yml
+  - type: DataModel
+    url: data-model/frejun-teler-data-model.yml
+  - type: Webhooks
+    url: asyncapi/frejun-teler-webhooks.yml
 common:
 - type: Website
   url: https://www.frejun.ai
