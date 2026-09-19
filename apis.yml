@@ -38,6 +38,8 @@ apis:
   humanURL: https://frejun.com/docs/teler/
   baseURL: https://api.frejun.ai
   tags:
+  - Event
+  tags_raw:
   - Events
   properties:
   - type: OpenAPI
@@ -140,6 +142,8 @@ apis:
   humanURL: https://frejun.com/docs/teler/
   baseURL: https://api.frejun.ai
   tags:
+  - SIP Trunks
+  tags_raw:
   - SIP / Trunks
   properties:
   - type: OpenAPI
