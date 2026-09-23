@@ -1,0 +1,525 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference Voice / Call Controls API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Voice / Call Controls
+  description: Act on a live call in real time — hang up, mute, send DTMF, or play audio. These actions are accepted asynchronously and return `202` with a `request_id`.
+paths:
+  /api/v1/voice/calls/{call_id}/hangup:
+    post:
+      tags:
+      - Voice / Call Controls
+      summary: Hang up a call
+      description: End a call, or a single leg of it. Omit `leg_id` to hang up the entire call; supply it to drop just that leg.
+      operationId: hangup_call
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HangupRequest'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationAccepted'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: The call is not in a state that accepts controls (e.g. it has already ended). `code` is one of `call_not_live`, `leg_not_found`, `call_not_controllable`, or `feature_not_enabled`.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call is not in a state that accepts controls.
+                code: call_not_live
+                type: invalid_state
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '503':
+          description: The call-control service is temporarily unavailable. Safe to retry.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The action could not be applied. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/voice/calls/{call_id}/mute:
+    post:
+      tags:
+      - Voice / Call Controls
+      summary: Mute or unmute a call leg
+      description: 'Mute (`on: true`) or unmute (`on: false`) a specific leg of a call.'
+      operationId: mute_call
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MuteRequest'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationAccepted'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: The call is not in a state that accepts controls (e.g. it has already ended). `code` is one of `call_not_live`, `leg_not_found`, `call_not_controllable`, or `feature_not_enabled`.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call is not in a state that accepts controls.
+                code: call_not_live
+                type: invalid_state
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '503':
+          description: The call-control service is temporarily unavailable. Safe to retry.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The action could not be applied. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/voice/calls/{call_id}/dtmf:
+    post:
+      tags:
+      - Voice / Call Controls
+      summary: Send DTMF tones on a call leg
+      description: Send DTMF (touch-tone) digits on a call leg, e.g. to navigate an IVR.
+      operationId: send_dtmf
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DtmfRequest'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationAccepted'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: The call is not in a state that accepts controls (e.g. it has already ended). `code` is one of `call_not_live`, `leg_not_found`, `call_not_controllable`, or `feature_not_enabled`.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call is not in a state that accepts controls.
+                code: call_not_live
+                type: invalid_state
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '503':
+          description: The call-control service is temporarily unavailable. Safe to retry.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The action could not be applied. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/voice/calls/{call_id}/play:
+    post:
+      tags:
+      - Voice / Call Controls
+      summary: Play an audio file into the call
+      description: Play an audio file into the call. The response includes a `playback_id` you can use to correlate playback lifecycle webhooks.
+      operationId: play_audio
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayRequest'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationAccepted'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: The call is not in a state that accepts controls (e.g. it has already ended). `code` is one of `call_not_live`, `leg_not_found`, `call_not_controllable`, or `feature_not_enabled`.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call is not in a state that accepts controls.
+                code: call_not_live
+                type: invalid_state
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '503':
+          description: The call-control service is temporarily unavailable. Safe to retry.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The action could not be applied. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    MuteRequest:
+      properties:
+        leg_id:
+          type: string
+          title: Leg Id
+          description: Leg to mute or unmute (`cl_` prefix).
+        'on':
+          type: boolean
+          title: 'On'
+          description: '`true` to mute the leg, `false` to unmute it.'
+      additionalProperties: false
+      type: object
+      required:
+      - leg_id
+      - 'on'
+      title: MuteRequest
+      example:
+        leg_id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
+        'on': true
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    HangupRequest:
+      properties:
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Leg to hang up (`cl_` prefix). Omit to end the entire call.
+        reason:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[A-Z0-9_]+$
+          - type: 'null'
+          title: Reason
+          description: Optional machine-readable reason, e.g. `AGENT_HANGUP`. Uppercase, digits, and underscores only.
+      additionalProperties: false
+      type: object
+      title: HangupRequest
+      example:
+        reason: AGENT_HANGUP
+    MutationAccepted:
+      properties:
+        request_id:
+          type: string
+          title: Request Id
+          description: Identifier for this control request. Reuse it to correlate retries and webhooks.
+        playback_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playback Id
+          description: Identifier of the started playback (`pb_` prefix). Only returned by the play action.
+      additionalProperties: false
+      type: object
+      required:
+      - request_id
+      title: MutationAccepted
+      example:
+        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
+    PlayRequest:
+      properties:
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Leg to play audio into (`cl_` prefix). Defaults to the primary leg.
+        media_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Media Url
+          description: HTTPS URL of the audio file to play (WAV or MP3).
+        loop:
+          type: integer
+          maximum: 10.0
+          minimum: 1.0
+          title: Loop
+          description: How many times to play the file (1–10).
+          default: 1
+        on_dtmf:
+          type: string
+          enum:
+          - stop
+          - ignore
+          title: On Dtmf
+          description: Whether an inbound DTMF digit stops playback (`stop`) or is ignored (`ignore`).
+          default: stop
+      additionalProperties: false
+      type: object
+      required:
+      - media_url
+      title: PlayRequest
+      example:
+        loop: 1
+        media_url: https://example.com/audio/greeting.wav
+        on_dtmf: stop
+    DtmfRequest:
+      properties:
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Leg to send the tones on (`cl_` prefix). Defaults to the primary leg.
+        digits:
+          type: string
+          maxLength: 64
+          minLength: 1
+          pattern: ^[0-9*#A-D]+$
+          title: Digits
+          description: 'DTMF digits to send. Allowed characters: `0-9`, `*`, `#`, `A-D`.'
+        duration_ms:
+          type: integer
+          maximum: 1000.0
+          minimum: 40.0
+          title: Duration Ms
+          description: Duration of each tone in milliseconds (40–1000).
+          default: 100
+      additionalProperties: false
+      type: object
+      required:
+      - digits
+      title: DtmfRequest
+      example:
+        digits: 1234#
+        duration_ms: 120
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

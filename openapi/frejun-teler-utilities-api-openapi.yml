@@ -1,0 +1,176 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference Utilities API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Utilities
+  description: Fetch short-lived, signed download URLs for call recordings.
+paths:
+  /api/v1/recordings:
+    get:
+      tags:
+      - Utilities
+      summary: Get a recording download URL
+      description: Resolve a recording to a short-lived, signed download URL. The endpoint responds with a `302` redirect whose `Location` header points at the audio file; follow the redirect to download it. The signed URL expires after `expires_in` seconds (default 15 minutes).
+      operationId: get_recording_download_url
+      parameters:
+      - name: recording_id
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Recording identifier (`rec_` prefix) or its canonical UUID.
+          title: Recording Id
+        description: Recording identifier (`rec_` prefix) or its canonical UUID.
+      - name: expires_in
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 86400
+          minimum: 60
+          description: Lifetime of the signed URL in seconds (60–86400). Defaults to 900.
+          default: 900
+          title: Expires In
+        description: Lifetime of the signed URL in seconds (60–86400). Defaults to 900.
+      responses:
+        '302':
+          description: Redirect to the signed recording URL.
+          content:
+            application/json:
+              schema: {}
+          headers:
+            Location:
+              description: The short-lived, signed URL of the recording audio.
+              schema:
+                type: string
+                format: uri
+        '403':
+          description: The recording does not belong to your account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: You do not have permission to access this recording.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The recording exists but its audio is not available.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested recording was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

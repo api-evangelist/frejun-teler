@@ -1,0 +1,491 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference Events API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Events
+  description: Inspect the webhook events Teler generated for your account and redeliver any that your endpoint missed.
+paths:
+  /api/v1/events:
+    get:
+      tags:
+      - Events
+      summary: List webhook events
+      description: List the webhook events generated for your account, newest first. Filter by call, event type, delivery status, or time, and page with cursors. Useful for auditing deliveries and reconciling missed events.
+      operationId: list_webhook_events
+      parameters:
+      - name: call_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Call Id
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+      - name: occurred_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Occurred After
+      - name: delivery_status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/WebhookDeliveryStatus'
+          - type: 'null'
+          title: Delivery Status
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: cursor_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Opaque cursor — page toward older rows (next page).
+          title: Cursor After
+        description: Opaque cursor — page toward older rows (next page).
+      - name: cursor_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Opaque cursor — page toward newer rows (previous page).
+          title: Cursor Before
+        description: Opaque cursor — page toward newer rows (previous page).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CursorPage_WebhookEventResponse_'
+        '400':
+          description: The pagination cursor is invalid or has expired.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The pagination cursor is invalid or has expired.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/events/{event_id}:
+    get:
+      tags:
+      - Events
+      summary: Retrieve a webhook event
+      description: Retrieve a single webhook event, including its full payload and delivery history.
+      operationId: retrieve_webhook_event
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEventResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No event matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested event was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/events/{event_id}/redeliver:
+    post:
+      tags:
+      - Events
+      summary: Redeliver a webhook event
+      description: Queue a webhook event for redelivery to your configured endpoint. Use this to recover events your endpoint missed during downtime. Events can only be replayed within the redelivery window.
+      operationId: redeliver_webhook_event
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Event Id
+      responses:
+        '202':
+          description: Redelivery was scheduled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEventRedeliverResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No event matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested event was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: The event cannot be redelivered in its current state, or has no delivery target configured.
+          content:
+            application/json:
+              example:
+                success: false
+                message: This event cannot be redelivered in its current state.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '410':
+          description: The event is older than the redelivery window and can no longer be replayed.
+          content:
+            application/json:
+              example:
+                success: false
+                message: This event is older than the redelivery window and cannot be replayed.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    WebhookEventRedeliverResponse:
+      properties:
+        event_id:
+          type: string
+          title: Event Id
+          description: The event that was queued for redelivery (`evt_` prefix).
+        redelivered_at:
+          type: string
+          format: date-time
+          title: Redelivered At
+          description: When the redelivery was scheduled.
+      type: object
+      required:
+      - event_id
+      - redelivered_at
+      title: WebhookEventRedeliverResponse
+      example:
+        event_id: evt_01JQ8Z9K7M3N2P4R5S6T7V8WGH
+        redelivered_at: '2026-06-01T10:05:00Z'
+    WebhookEventResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Unique identifier for the event (`evt_` prefix).
+        account_id:
+          type: string
+          title: Account Id
+          description: The account the event belongs to (`acc_` prefix).
+        call_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Call Id
+          description: Related call (`cs_` prefix), if the event is call-scoped.
+        sip_trunk_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sip Trunk Id
+          description: Related SIP trunk (`st_` prefix), if applicable.
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Related call leg (`cl_` prefix), if applicable.
+        type:
+          type: string
+          title: Type
+          description: Event type, e.g. `call.completed`. See the webhook events reference.
+        api_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Api Version
+          description: Dated payload version this event was rendered with, e.g. `2026-06-01`.
+        occurred_at:
+          type: string
+          format: date-time
+          title: Occurred At
+          description: When the underlying event occurred.
+        payload:
+          additionalProperties: true
+          type: object
+          title: Payload
+          description: The full event payload delivered to your webhook.
+        delivery_status:
+          $ref: '#/components/schemas/WebhookDeliveryStatus'
+          description: Current delivery status of the event.
+        attempt_count:
+          type: integer
+          title: Attempt Count
+          description: Number of delivery attempts made so far.
+        last_attempt_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Last Attempt At
+          description: When the most recent attempt was made.
+        last_status_code:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Last Status Code
+          description: HTTP status returned by your endpoint on the last attempt.
+        last_error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Error
+          description: Error from the last failed attempt, if any.
+        delivered_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Delivered At
+          description: When the event was successfully delivered, if it was.
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+          description: When the event record was created.
+      type: object
+      required:
+      - id
+      - account_id
+      - type
+      - occurred_at
+      - payload
+      - delivery_status
+      - attempt_count
+      - created_at
+      title: WebhookEventResponse
+      example:
+        account_id: acc_01JQ8Z9K7M3N2P4R5S6T7V8WIJ
+        api_version: '2026-06-01'
+        attempt_count: 1
+        call_id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+        created_at: '2026-06-01T09:17:48Z'
+        delivered_at: '2026-06-01T09:17:49Z'
+        delivery_status: delivered
+        id: evt_01JQ8Z9K7M3N2P4R5S6T7V8WGH
+        last_attempt_at: '2026-06-01T09:17:49Z'
+        last_status_code: 200
+        occurred_at: '2026-06-01T09:17:48Z'
+        payload:
+          call_id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+          type: call.completed
+        type: call.completed
+    CursorPage_WebhookEventResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/WebhookEventResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[WebhookEventResponse]
+    WebhookDeliveryStatus:
+      type: string
+      enum:
+      - pending
+      - delivered
+      - failed_permanent
+      - backfill_skipped
+      title: WebhookDeliveryStatus
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

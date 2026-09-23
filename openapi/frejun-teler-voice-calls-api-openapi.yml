@@ -1,0 +1,758 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference Voice / Calls API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Voice / Calls
+  description: Place outbound calls and read call state. A **call** (`cs_`) is the top-level session; each party on it is a **leg** (`cl_`).
+paths:
+  /api/v1/voice/calls/initiate:
+    post:
+      tags:
+      - Voice / Calls
+      summary: Initiate a call
+      description: 'Place an outbound call. Teler dials `to_number` from `from_number`, and once the call connects it fetches your `flow_url` to drive the conversation. Status updates are delivered to `status_callback_url` for the lifetime of the call.
+
+
+        The call is accepted asynchronously: a `202` means Teler has queued the call, not that the callee has answered. Track progress via webhooks or by polling **Retrieve a call**.'
+      operationId: initiate_call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallInitiateRequest'
+      responses:
+        '202':
+          description: The call was accepted and is being placed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallInitiateResponse'
+        '400':
+          description: The call was rejected before dialing. The `code` and `message` are propagated from the call-control service and describe the specific reason; the values shown here are illustrative.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The from_number is not provisioned for outbound calls.
+                code: from_number_not_provisioned
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '502':
+          description: Teler could not reach the call-control service.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call could not be initiated. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '504':
+          description: The call could not be initiated in time.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call could not be initiated in time. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/voice/calls:
+    get:
+      tags:
+      - Voice / Calls
+      summary: List calls
+      description: List your account's calls, newest first. Filter by state, numbers, or creation time, and page through results with cursors (see the Pagination section in the overview).
+      operationId: list_voice_calls
+      parameters:
+      - name: state
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/CallSessionState'
+          - type: 'null'
+          title: State
+      - name: from_number
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: From Number
+      - name: to_number
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: To Number
+      - name: created_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created After
+      - name: created_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created Before
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: cursor_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Opaque cursor — page toward older rows (next page).
+          title: Cursor After
+        description: Opaque cursor — page toward older rows (next page).
+      - name: cursor_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Opaque cursor — page toward newer rows (previous page).
+          title: Cursor Before
+        description: Opaque cursor — page toward newer rows (previous page).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CursorPage_CallSessionResponse_'
+        '400':
+          description: The pagination cursor is invalid or has expired.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The pagination cursor is invalid or has expired.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/voice/calls/{call_id}:
+    get:
+      tags:
+      - Voice / Calls
+      summary: Retrieve a call
+      description: Retrieve a single call by its identifier, including its legs.
+      operationId: retrieve_voice_call
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallSessionResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/voice/calls/{call_id}/legs:
+    get:
+      tags:
+      - Voice / Calls
+      summary: List call legs
+      description: List the individual legs that make up a call, in creation order.
+      operationId: list_call_legs
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CursorPage_CallLegResponse_'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  schemas:
+    CursorPage_CallLegResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/CallLegResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[CallLegResponse]
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    CallInitiateResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Human-readable confirmation message.
+        data:
+          $ref: '#/components/schemas/CallInitiateData'
+          description: Details of the accepted call.
+      type: object
+      required:
+      - message
+      - data
+      title: CallInitiateResponse
+      example:
+        data:
+          from_number: '+14155552671'
+          id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+          record: true
+          status_callback_url: https://yourapp.com/callback
+          to_number: '+14155559876'
+        message: Call initiated successfully
+    CallSessionResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Unique identifier for the call (`cs_` prefix).
+        account_id:
+          type: string
+          title: Account Id
+          description: The account that owns the call (`acc_` prefix).
+        voice_app_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Voice App Id
+          description: The voice app that handled the call (`va_` prefix), if any.
+        state:
+          $ref: '#/components/schemas/CallSessionState'
+          description: Current lifecycle state of the call.
+        direction:
+          $ref: '#/components/schemas/CallDirection'
+          description: Whether the call was placed outbound or received inbound.
+        from_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: From Number
+          description: Caller number in E.164 format.
+        to_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: To Number
+          description: Called number in E.164 format.
+        properties:
+          additionalProperties: true
+          type: object
+          title: Properties
+          description: Arbitrary metadata you attached when initiating the call.
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+          description: When the call was created.
+        answered_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Answered At
+          description: When the call was answered, if it was.
+        ended_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Ended At
+          description: When the call ended, if it has.
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+          description: Machine-readable reason the call ended.
+        legs:
+          items:
+            $ref: '#/components/schemas/CallLegResponse'
+          type: array
+          title: Legs
+          description: The individual legs that make up this call.
+      type: object
+      required:
+      - id
+      - account_id
+      - state
+      - direction
+      - created_at
+      title: CallSessionResponse
+      example:
+        account_id: acc_01JQ8Z9K7M3N2P4R5S6T7V8WIJ
+        answered_at: '2026-06-01T09:15:12Z'
+        created_at: '2026-06-01T09:15:04Z'
+        direction: outbound
+        from_number: '+14155552671'
+        id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+        legs: []
+        properties: {}
+        state: answered
+        to_number: '+14155559876'
+        voice_app_id: va_01JQ8Z9K7M3N2P4R5S6T7V8WKL
+    CallLegRole:
+      type: string
+      enum:
+      - primary
+      - dial_target
+      - transfer_target
+      - monitor
+      - parked
+      title: CallLegRole
+    CallDirection:
+      type: string
+      enum:
+      - inbound
+      - outbound
+      title: CallDirection
+    CallSessionState:
+      type: string
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - completed
+      - failed
+      title: CallSessionState
+    CallLegResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Unique identifier for this leg (`cl_` prefix).
+        call_session_id:
+          type: string
+          title: Call Session Id
+          description: The call this leg belongs to (`cs_` prefix).
+        direction:
+          $ref: '#/components/schemas/CallDirection'
+          description: Whether the leg dialed out or was received.
+        role:
+          $ref: '#/components/schemas/CallLegRole'
+          description: The leg's role within the call.
+        state:
+          $ref: '#/components/schemas/CallLegState'
+          description: Current lifecycle state of the leg.
+        from_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: From Number
+          description: Caller number in E.164 format.
+        to_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: To Number
+          description: Called number in E.164 format.
+        parent_leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Parent Leg Id
+          description: The leg that spawned this one (e.g. for transfers), if any.
+        recordings:
+          items:
+            type: string
+          type: array
+          title: Recordings
+          description: Recording identifiers (`rec_` prefix) captured on this leg.
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+          description: When the leg was created.
+        answered_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Answered At
+          description: When the leg was answered, if it was.
+        ended_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Ended At
+          description: When the leg ended, if it has.
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+          description: Machine-readable reason the leg ended.
+        ended_by:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ended By
+          description: Which party ended the leg.
+      type: object
+      required:
+      - id
+      - call_session_id
+      - direction
+      - role
+      - state
+      - created_at
+      title: CallLegResponse
+      example:
+        answered_at: '2026-06-01T09:15:12Z'
+        call_session_id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+        created_at: '2026-06-01T09:15:04Z'
+        direction: outbound
+        from_number: '+14155552671'
+        id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
+        recordings:
+        - rec_01JQ8Z9K7M3N2P4R5S6T7V8WEF
+        role: primary
+        state: answered
+        to_number: '+14155559876'
+    CallInitiateData:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Identifier of the newly created call (`cs_` prefix).
+        from_number:
+          type: string
+          title: From Number
+          description: The number the call is placed from.
+        to_number:
+          type: string
+          title: To Number
+          description: The number being dialed.
+        status_callback_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Status Callback Url
+          description: Where status webhooks will be delivered.
+        record:
+          type: boolean
+          title: Record
+          description: Whether the call is being recorded.
+      type: object
+      required:
+      - id
+      - from_number
+      - to_number
+      - status_callback_url
+      - record
+      title: CallInitiateData
+    CursorPage_CallSessionResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/CallSessionResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[CallSessionResponse]
+    CallInitiateRequest:
+      properties:
+        from_number:
+          type: string
+          maxLength: 16
+          minLength: 8
+          pattern: ^\+\d{7,15}$
+          title: From Number
+          description: The number to place the call from, in E.164 format. Must be a number you own.
+        to_number:
+          type: string
+          maxLength: 16
+          minLength: 8
+          pattern: ^\+\d{7,15}$
+          title: To Number
+          description: The destination number to dial, in E.164 format.
+        flow_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Flow Url
+          description: HTTPS URL Teler fetches when the call connects to obtain the call flow that drives the call.
+        status_callback_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Status Callback Url
+          description: HTTPS URL that receives status webhooks for the lifetime of the call.
+        record:
+          type: boolean
+          title: Record
+          description: Whether to record the call. Defaults to `true`.
+          default: true
+      type: object
+      required:
+      - from_number
+      - to_number
+      - flow_url
+      - status_callback_url
+      title: CallInitiateRequest
+      example:
+        flow_url: https://example.com/flows/123
+        from_number: '+14155552671'
+        record: true
+        status_callback_url: https://yourapp.com/callback
+        to_number: '+14155559876'
+    CallLegState:
+      type: string
+      enum:
+      - created
+      - ringing
+      - answered
+      - completed
+      - failed
+      title: CallLegState
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

@@ -1,0 +1,411 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference SIP / Calls API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: SIP / Calls
+  description: Read calls that arrived or left over your SIP trunks (`st_`).
+paths:
+  /api/v1/sip/calls:
+    get:
+      tags:
+      - SIP / Calls
+      summary: List SIP calls
+      description: List calls that traversed your SIP trunks, newest first. Filter by trunk, numbers, or creation time, and page with cursors (see the Pagination section in the overview).
+      operationId: list_sip_calls
+      parameters:
+      - name: trunk_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by SIP trunk. Accepts the `st_<ULID>` identifier.
+          title: Trunk Id
+        description: Filter by SIP trunk. Accepts the `st_<ULID>` identifier.
+      - name: from_number
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: From Number
+      - name: to_number
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: To Number
+      - name: created_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created After
+      - name: created_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created Before
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: cursor_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor After
+      - name: cursor_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor Before
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CursorPage_SipCallResponse_'
+        '400':
+          description: The pagination cursor is invalid or has expired.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The pagination cursor is invalid or has expired.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/sip/calls/{call_id}:
+    get:
+      tags:
+      - SIP / Calls
+      summary: Retrieve a SIP call
+      description: Retrieve a single SIP call by its identifier.
+      operationId: retrieve_sip_call
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SipCallResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    CursorPage_SipCallResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/SipCallResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[SipCallResponse]
+    CallSessionState:
+      type: string
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - completed
+      - failed
+      title: CallSessionState
+    CallDirection:
+      type: string
+      enum:
+      - inbound
+      - outbound
+      title: CallDirection
+    SipCallResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Unique identifier for the call (`cs_` prefix).
+        account_id:
+          type: string
+          title: Account Id
+          description: The account that owns the call (`acc_` prefix).
+        sip_trunk_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sip Trunk Id
+          description: The SIP trunk the call traversed (`st_` prefix), if any.
+        state:
+          $ref: '#/components/schemas/CallSessionState'
+          description: Current lifecycle state of the call.
+        direction:
+          $ref: '#/components/schemas/CallDirection'
+          description: Whether the call was inbound or outbound over the trunk.
+        from_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: From Number
+          description: Caller number in E.164 format.
+        to_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: To Number
+          description: Called number in E.164 format.
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+          description: When the call was created.
+        answered_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Answered At
+          description: When the call was answered, if it was.
+        ended_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Ended At
+          description: When the call ended, if it has.
+        duration_seconds:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Duration Seconds
+          description: Billable duration of the primary leg in seconds, once the call has ended.
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+          description: Machine-readable reason the call ended.
+        ended_by:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ended By
+          description: Which party ended the call.
+        recordings:
+          items:
+            type: string
+          type: array
+          title: Recordings
+          description: Recording identifiers (`rec_` prefix) captured on this call.
+      type: object
+      required:
+      - id
+      - account_id
+      - state
+      - direction
+      - created_at
+      title: SipCallResponse
+      example:
+        account_id: acc_01JQ8Z9K7M3N2P4R5S6T7V8WIJ
+        answered_at: '2026-06-01T09:15:12Z'
+        created_at: '2026-06-01T09:15:04Z'
+        direction: inbound
+        duration_seconds: 156
+        ended_at: '2026-06-01T09:17:48Z'
+        ended_by: caller
+        from_number: '+14155552671'
+        id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+        reason: completed
+        recordings:
+        - rec_01JQ8Z9K7M3N2P4R5S6T7V8WEF
+        sip_trunk_id: st_01JQ8Z9K7M3N2P4R5S6T7V8WMN
+        state: completed
+        to_number: '+14155559876'
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

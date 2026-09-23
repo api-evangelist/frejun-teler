@@ -1,0 +1,833 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference SIP / Trunks API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: SIP Trunks
+  description: SIP trunks connect Teler to your upstream carrier or PBX. Create, configure, and manage your trunks, or inspect which virtual numbers are assigned to each one.
+paths:
+  /api/v1/sip/trunks:
+    post:
+      tags:
+      - SIP Trunks
+      summary: Create a SIP trunk
+      operationId: create_sip_trunk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SipTrunkCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SipTrunkResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    get:
+      tags:
+      - SIP Trunks
+      summary: List SIP trunks
+      operationId: list_sip_trunks
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          title: Limit
+      - name: search
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Search
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/Status'
+          - type: 'null'
+          title: Status
+      - name: cursor_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor After
+      - name: cursor_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor Before
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CursorPage_SipTrunkResponse_'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/sip/trunks/{trunk_id}:
+    get:
+      tags:
+      - SIP Trunks
+      summary: Retrieve a SIP trunk
+      operationId: retrieve_sip_trunk
+      parameters:
+      - name: trunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Trunk Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SipTrunkResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    patch:
+      tags:
+      - SIP Trunks
+      summary: Update a SIP trunk
+      operationId: update_sip_trunk
+      parameters:
+      - name: trunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Trunk Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SipTrunkUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SipTrunkResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    delete:
+      tags:
+      - SIP Trunks
+      summary: Delete a SIP trunk
+      operationId: delete_sip_trunk
+      parameters:
+      - name: trunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Trunk Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/sip/trunks/{trunk_id}/virtual-numbers:
+    get:
+      tags:
+      - SIP Trunks
+      summary: List virtual numbers for a SIP trunk
+      operationId: list_sip_trunk_virtual_numbers
+      parameters:
+      - name: trunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Trunk Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 10
+          title: Limit
+      - name: search
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Search
+      - name: location
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: array
+            items:
+              type: string
+          - type: 'null'
+          title: Location
+      - name: cursor_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor After
+      - name: cursor_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor Before
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CursorPage_VNListResponse_'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  schemas:
+    InboundRoute:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Name
+          description: Route name
+        sip_url:
+          type: string
+          minLength: 1
+          title: Sip Url
+          description: SIP destination URL or endpoint
+        sip_user:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sip User
+          description: SIP user name
+      type: object
+      required:
+      - name
+      - sip_url
+      title: InboundRoute
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    DefaultResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - success
+      - message
+      title: DefaultResponse
+    Status:
+      type: string
+      enum:
+      - active
+      - inactive
+      title: Status
+    SipTransport:
+      type: string
+      enum:
+      - tls
+      - tcp
+      - udp
+      title: SipTransport
+    SipTrunkUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Name
+        channel_limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Channel Limit
+        recording:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Recording
+        secure:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Secure
+        transport:
+          anyOf:
+          - $ref: '#/components/schemas/SipTransport'
+          - type: 'null'
+          description: 'SIP transport: `tls`, `tcp`, or `udp`. `udp` requires `authentication_type` = `credential`.'
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+        webhook_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Webhook Url
+        webhook_api_version:
+          anyOf:
+          - type: string
+            enum:
+            - '2025-08-01'
+            - '2026-06-01'
+          - type: 'null'
+          title: Webhook Api Version
+        authentication_type:
+          anyOf:
+          - $ref: '#/components/schemas/AuthenticationType'
+          - type: 'null'
+        auth_credential:
+          anyOf:
+          - $ref: '#/components/schemas/SipAuthCredentialInput'
+          - type: 'null'
+        auth_addresses:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/SipAuthAddressInput'
+            type: array
+          - type: 'null'
+          title: Auth Addresses
+        ip_acl_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ip Acl Id
+          description: ID of an IP access control list (`acl_...`) to authorise against, as an alternative to `auth_addresses`. Supplying one switches the trunk to that mode and clears the other.
+        inbound_route:
+          anyOf:
+          - $ref: '#/components/schemas/InboundRoute'
+          - type: 'null'
+        secret_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Id
+      additionalProperties: false
+      type: object
+      title: SipTrunkUpdate
+    SipTrunkCreate:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Name
+        domain_name:
+          type: string
+          minLength: 1
+          title: Domain Name
+        channel_limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Channel Limit
+          default: 0
+        recording:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Recording
+          default: false
+        secure:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Secure
+          default: false
+        transport:
+          anyOf:
+          - $ref: '#/components/schemas/SipTransport'
+          - type: 'null'
+          description: 'SIP transport for this trunk: `tls`, `tcp`, or `udp`. If omitted, it is derived from `secure` (`secure=true`→`tls`, else `tcp`). `udp` requires `authentication_type` = `credential`.'
+        webhook_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Webhook Url
+        authentication_type:
+          $ref: '#/components/schemas/AuthenticationType'
+        auth_credential:
+          anyOf:
+          - $ref: '#/components/schemas/SipAuthCredentialInput'
+          - type: 'null'
+        auth_addresses:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/SipAuthAddressInput'
+            type: array
+          - type: 'null'
+          title: Auth Addresses
+        ip_acl_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ip Acl Id
+          description: ID of an IP access control list (`acl_...`) to authorise against, as an alternative to `auth_addresses`. Provide exactly one of the two when `authentication_type` is `IP`.
+        inbound_route:
+          anyOf:
+          - $ref: '#/components/schemas/InboundRoute'
+          - type: 'null'
+        secret_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Id
+        webhook_api_version:
+          anyOf:
+          - type: string
+            enum:
+            - '2025-08-01'
+            - '2026-06-01'
+          - type: 'null'
+          title: Webhook Api Version
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - domain_name
+      - authentication_type
+      title: SipTrunkCreate
+    SipAuthAddressInput:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Name
+          description: Authentication address name
+        address:
+          type: string
+          minLength: 1
+          title: Address
+          description: IP or hostname for SIP auth
+      type: object
+      required:
+      - name
+      - address
+      title: SipAuthAddressInput
+    CursorPage_VNListResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/VNListResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[VNListResponse]
+    CursorPage_SipTrunkResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/SipTrunkResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[SipTrunkResponse]
+    SipAuthCredentialInput:
+      properties:
+        username:
+          type: string
+          minLength: 5
+          title: Username
+          description: SIP authentication username
+        password:
+          type: string
+          minLength: 5
+          title: Password
+          description: SIP authentication password
+      type: object
+      required:
+      - username
+      - password
+      title: SipAuthCredentialInput
+    VNListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        account_id:
+          type: string
+          title: Account Id
+        name:
+          type: string
+          title: Name
+        number:
+          type: string
+          title: Number
+        location:
+          $ref: '#/components/schemas/LocationResponse'
+        voice_app:
+          anyOf:
+          - $ref: '#/components/schemas/CallAppListResponse'
+          - type: 'null'
+        sip_trunk:
+          anyOf:
+          - $ref: '#/components/schemas/SipTrunkListResponse'
+          - type: 'null'
+      type: object
+      required:
+      - id
+      - account_id
+      - name
+      - number
+      - location
+      - voice_app
+      - sip_trunk
+      title: VNListResponse
+    SipTrunkListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: SipTrunkListResponse
+    CallAppListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: CallAppListResponse
+    SipTrunkResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        domain_name:
+          type: string
+          title: Domain Name
+        account_id:
+          type: string
+          title: Account Id
+        channel_limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Channel Limit
+        cps_limit:
+          type: integer
+          title: Cps Limit
+        recording_enabled:
+          type: boolean
+          title: Recording Enabled
+        secure:
+          type: boolean
+          title: Secure
+        transport:
+          anyOf:
+          - $ref: '#/components/schemas/SipTransport'
+          - type: 'null'
+        is_active:
+          type: boolean
+          title: Is Active
+        authentication_type:
+          anyOf:
+          - $ref: '#/components/schemas/AuthenticationType'
+          - type: 'null'
+        auth_ip_addresses:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Auth Ip Addresses
+          default: []
+        auth_credential_usernames:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Auth Credential Usernames
+          default: []
+        ip_acl_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ip Acl Id
+          description: The IP access control list this trunk authorises against, if any.
+        ip_acl_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ip Acl Name
+        sip_route:
+          anyOf:
+          - $ref: '#/components/schemas/InboundRoute'
+          - type: 'null'
+        webhook_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Webhook Url
+        webhook_api_version:
+          type: string
+          enum:
+          - '2025-08-01'
+          - '2026-06-01'
+          title: Webhook Api Version
+        created_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created At
+        updated_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updated At
+        secret_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Id
+        secret_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Name
+      type: object
+      required:
+      - id
+      - name
+      - domain_name
+      - account_id
+      - cps_limit
+      - recording_enabled
+      - secure
+      - is_active
+      - webhook_api_version
+      title: SipTrunkResponse
+    LocationResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        region_code:
+          type: string
+          title: Region Code
+        country_code:
+          type: string
+          title: Country Code
+        country_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country Name
+      type: object
+      required:
+      - id
+      - name
+      - region_code
+      - country_code
+      title: LocationResponse
+    AuthenticationType:
+      type: string
+      enum:
+      - credential
+      - IP
+      title: AuthenticationType
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

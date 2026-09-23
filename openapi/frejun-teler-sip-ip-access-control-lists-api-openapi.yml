@@ -1,0 +1,576 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference SIP / IP Access Control Lists API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: SIP / IP Access Control Lists
+  description: 'Named sets of source IPs or CIDR networks (`acl_`) that SIP trunks with `authentication_type: IP` authorise against. Attach one to many trunks and update it in a single place.'
+paths:
+  /api/v1/sip/ip-acls:
+    post:
+      tags:
+      - SIP / IP Access Control Lists
+      summary: Create an IP access control list
+      description: 'Create a named set of source IPs or CIDR networks that SIP trunks can authorise against. Reference the returned `id` as `ip_acl_id` when creating or updating a trunk with `authentication_type: IP`.'
+      operationId: create_ip_acl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpAclCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpAclResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Another IP access control list in this account already uses that name.
+          content:
+            application/json:
+              example:
+                success: false
+                message: An IP access control list with this name already exists.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    get:
+      tags:
+      - SIP / IP Access Control Lists
+      summary: List IP access control lists
+      description: List the IP access control lists in your account, newest first. Page with cursors (see the Pagination section in the overview).
+      operationId: list_ip_acls
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          title: Limit
+      - name: search
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Search
+      - name: cursor_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor After
+      - name: cursor_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor Before
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CursorPage_IpAclListResponse_'
+        '400':
+          description: The pagination cursor is invalid or has expired.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The pagination cursor is invalid or has expired.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/v1/sip/ip-acls/{ip_acl_id}:
+    get:
+      tags:
+      - SIP / IP Access Control Lists
+      summary: Retrieve an IP access control list
+      description: Retrieve a single IP access control list, including its addresses.
+      operationId: retrieve_ip_acl
+      parameters:
+      - name: ip_acl_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: The IP access control list identifier.
+          examples:
+          - acl_01JQ8Z9K7M3N2P4R5S6T7V8WST
+          title: Ip Acl Id
+        description: The IP access control list identifier.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpAclResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No IP access control list matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested IP access control list was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    patch:
+      tags:
+      - SIP / IP Access Control Lists
+      summary: Update an IP access control list
+      description: Rename an ACL and/or replace its addresses. Supplying `addresses` replaces the entire set. Changes apply to every trunk using this ACL.
+      operationId: update_ip_acl
+      parameters:
+      - name: ip_acl_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: The IP access control list identifier.
+          examples:
+          - acl_01JQ8Z9K7M3N2P4R5S6T7V8WST
+          title: Ip Acl Id
+        description: The IP access control list identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpAclUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpAclResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No IP access control list matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested IP access control list was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Another IP access control list in this account already uses that name.
+          content:
+            application/json:
+              example:
+                success: false
+                message: An IP access control list with this name already exists.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+    delete:
+      tags:
+      - SIP / IP Access Control Lists
+      summary: Delete an IP access control list
+      description: Delete an IP access control list. Refused with `409` while any SIP trunk still authorises against it, so a trunk can never be left without an auth source.
+      operationId: delete_ip_acl
+      parameters:
+      - name: ip_acl_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: The IP access control list identifier.
+          examples:
+          - acl_01JQ8Z9K7M3N2P4R5S6T7V8WST
+          title: Ip Acl Id
+        description: The IP access control list identifier.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No IP access control list matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested IP access control list was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: The IP access control list is still attached to one or more SIP trunks. Point those trunks at another IP access control list (or at individual addresses) first.
+          content:
+            application/json:
+              example:
+                success: false
+                message: '''carrier-egress'' is attached to 2 trunk(s). Detach it from each one before deleting.'
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  schemas:
+    IpAclResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: IP access control list ID, e.g. `acl_...`.
+        name:
+          type: string
+          title: Name
+        addresses:
+          items:
+            $ref: '#/components/schemas/IpAclEntryResponse'
+          type: array
+          title: Addresses
+          default: []
+        trunk_count:
+          type: integer
+          title: Trunk Count
+          description: How many SIP trunks currently authorise against this ACL.
+          default: 0
+        created_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created At
+        updated_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Updated At
+      type: object
+      required:
+      - id
+      - name
+      title: IpAclResponse
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    CursorPage_IpAclListResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/IpAclListResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[IpAclListResponse]
+    IpAclEntryResponse:
+      properties:
+        address:
+          type: string
+          title: Address
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+      type: object
+      required:
+      - address
+      title: IpAclEntryResponse
+    IpAclUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 64
+            minLength: 1
+          - type: 'null'
+          title: Name
+        addresses:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/IpAclEntryInput'
+            type: array
+            minItems: 1
+          - type: 'null'
+          title: Addresses
+          description: When supplied, replaces the full set of addresses.
+      additionalProperties: false
+      type: object
+      title: IpAclUpdate
+    IpAclCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Name
+          description: Unique name for this ACL within your account.
+        addresses:
+          items:
+            $ref: '#/components/schemas/IpAclEntryInput'
+          type: array
+          minItems: 1
+          title: Addresses
+          description: At least one address or CIDR network.
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - addresses
+      title: IpAclCreate
+    IpAclEntryInput:
+      properties:
+        address:
+          type: string
+          title: Address
+          description: IPv4/IPv6 address or CIDR network, e.g. `203.0.113.7` or `203.0.113.0/24`. CIDR networks are stored in canonical form (host bits stripped).
+        description:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Description
+          description: Optional note, e.g. the carrier or PoP.
+      additionalProperties: false
+      type: object
+      required:
+      - address
+      title: IpAclEntryInput
+    DefaultResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - success
+      - message
+      title: DefaultResponse
+    IpAclListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: IP access control list ID, e.g. `acl_...`.
+        name:
+          type: string
+          title: Name
+        address_count:
+          type: integer
+          title: Address Count
+          default: 0
+        trunk_count:
+          type: integer
+          title: Trunk Count
+          default: 0
+        created_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created At
+      type: object
+      required:
+      - id
+      - name
+      title: IpAclListResponse
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

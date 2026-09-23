@@ -1,0 +1,270 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference Voice / Calls (legacy) API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Voice / Calls (legacy)
+  description: Deprecated endpoints kept for backwards compatibility. Prefer the **Voice / Calls** endpoints for all new integrations.
+paths:
+  /api/v1/calls/initiate:
+    post:
+      tags:
+      - Voice / Calls (legacy)
+      summary: (Deprecated) Initiate a call
+      description: '**Deprecated.** Use `POST /api/v1/voice/calls/initiate` (Voice / Calls) instead. This path is kept only for backwards compatibility and will be removed in a future version.'
+      operationId: initiate_call_legacy
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallInitiateRequest'
+      responses:
+        '202':
+          description: The call was accepted and is being placed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallInitiateResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '502':
+          description: Teler could not reach the call-control service.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call could not be initiated. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '504':
+          description: The call could not be initiated in time.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The call could not be initiated in time. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    CallInitiateResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Human-readable confirmation message.
+        data:
+          $ref: '#/components/schemas/CallInitiateData'
+          description: Details of the accepted call.
+      type: object
+      required:
+      - message
+      - data
+      title: CallInitiateResponse
+      example:
+        data:
+          from_number: '+14155552671'
+          id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+          record: true
+          status_callback_url: https://yourapp.com/callback
+          to_number: '+14155559876'
+        message: Call initiated successfully
+    CallInitiateData:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Identifier of the newly created call (`cs_` prefix).
+        from_number:
+          type: string
+          title: From Number
+          description: The number the call is placed from.
+        to_number:
+          type: string
+          title: To Number
+          description: The number being dialed.
+        status_callback_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Status Callback Url
+          description: Where status webhooks will be delivered.
+        record:
+          type: boolean
+          title: Record
+          description: Whether the call is being recorded.
+      type: object
+      required:
+      - id
+      - from_number
+      - to_number
+      - status_callback_url
+      - record
+      title: CallInitiateData
+    CallInitiateRequest:
+      properties:
+        from_number:
+          type: string
+          maxLength: 16
+          minLength: 8
+          pattern: ^\+\d{7,15}$
+          title: From Number
+          description: The number to place the call from, in E.164 format. Must be a number you own.
+        to_number:
+          type: string
+          maxLength: 16
+          minLength: 8
+          pattern: ^\+\d{7,15}$
+          title: To Number
+          description: The destination number to dial, in E.164 format.
+        flow_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Flow Url
+          description: HTTPS URL Teler fetches when the call connects to obtain the call flow that drives the call.
+        status_callback_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Status Callback Url
+          description: HTTPS URL that receives status webhooks for the lifetime of the call.
+        record:
+          type: boolean
+          title: Record
+          description: Whether to record the call. Defaults to `true`.
+          default: true
+      type: object
+      required:
+      - from_number
+      - to_number
+      - flow_url
+      - status_callback_url
+      title: CallInitiateRequest
+      example:
+        flow_url: https://example.com/flows/123
+        from_number: '+14155552671'
+        record: true
+        status_callback_url: https://yourapp.com/callback
+        to_number: '+14155559876'
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.

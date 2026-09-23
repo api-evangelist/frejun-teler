@@ -1,0 +1,44 @@
+{
+  "provider": "frejun-teler",
+  "sources": [
+    "_original/frejun-teler-openapi.json"
+  ],
+  "outputs": [
+    "frejun-teler-events-api-openapi.yml",
+    "frejun-teler-sip-calls-api-openapi.yml",
+    "frejun-teler-sip-ip-access-control-lists-api-openapi.yml",
+    "frejun-teler-sip-trunks-api-openapi.yml",
+    "frejun-teler-secrets-api-openapi.yml",
+    "frejun-teler-utilities-api-openapi.yml",
+    "frejun-teler-virtual-numbers-api-openapi.yml",
+    "frejun-teler-voice-apps-api-openapi.yml",
+    "frejun-teler-voice-call-controls-api-openapi.yml",
+    "frejun-teler-voice-calls-api-openapi.yml",
+    "frejun-teler-voice-calls-legacy-api-openapi.yml",
+    "frejun-teler-voice-operations-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "1 archived document(s) dropped as subsets of other archived documents",
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "frejun-teler-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "_original/frejun-teler-openapi_2.json: archived document superseded by a larger archived document",
+    "frejun-teler-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-secrets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-sip-calls-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-sip-ip-access-control-lists-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-sip-trunks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-utilities-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-virtual-numbers-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-voice-apps-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-voice-call-controls-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-voice-calls-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-voice-calls-legacy-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "frejun-teler-voice-operations-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}

@@ -1,0 +1,402 @@
+openapi: 3.2.0
+info:
+  title: Teler API Reference Voice / Operations API
+  summary: Programmable voice infrastructure for AI agents.
+  description: 'The Teler API lets you place and control programmable voice calls, stream live
+
+    audio to AI agents, and observe everything that happens on a call in real time.'
+  contact:
+    name: Teler support
+    email: support@frejun.com
+  version: 0.1.0
+servers:
+- url: https://api.frejun.ai
+  description: Production
+security:
+- ApiKeyAuth: []
+tags:
+- name: Voice / Operations
+  description: Higher-level, multi-step operations on a live call, such as transferring it to a new destination.
+paths:
+  /api/v1/voice/calls/{call_id}/transfer:
+    post:
+      tags:
+      - Voice / Operations
+      summary: Transfer a call
+      description: 'Transfer an in-progress call to a new destination — a phone number (`pstn`) or a SIP URI (`sip`). Only `cold` transfers are currently supported. A call can have only one transfer in flight at a time.
+
+
+        The transfer is accepted asynchronously; a `202` means it has been started, not that the target has answered.'
+      operationId: transfer_call
+      parameters:
+      - name: call_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Call Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '202':
+          description: The transfer was accepted and is being placed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferAccepted'
+        '400':
+          description: The transfer target or mode is invalid (e.g. missing `number` for a `pstn` target, or an unsupported mode).
+          content:
+            application/json:
+              example:
+                success: false
+                message: target.number is required when kind='pstn'.
+                code: invalid_target
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The `x-api-key` header is missing or invalid.
+          content:
+            application/json:
+              example:
+                success: false
+                message: Invalid API Key.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No call matches the supplied identifier for this account.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The requested call was not found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: A transfer is already in progress for this call.
+          content:
+            application/json:
+              example:
+                success: false
+                message: A transfer is already in progress for this call.
+                code: transfer_in_progress
+                type: invalid_state
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: The request body or query parameters failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '503':
+          description: The call-control service is temporarily unavailable. Safe to retry.
+          content:
+            application/json:
+              example:
+                success: false
+                message: The transfer could not be started. Please try again.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    TransferNestedAction:
+      properties:
+        action:
+          type: string
+          enum:
+          - play
+          - say
+          - hangup
+          title: Action
+        media_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Media Url
+        text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Text
+        voice:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Voice
+        language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Language
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+        loop:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Loop
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      title: TransferNestedAction
+    TransferTarget:
+      properties:
+        kind:
+          type: string
+          enum:
+          - pstn
+          - sip
+          - leg
+          title: Kind
+          description: Destination type. `pstn` requires `number`; `sip` requires `uri`. `leg` is not yet supported.
+        number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Number
+          description: Destination phone number in E.164 format. Required when `kind` is `pstn`.
+        uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uri
+          description: Destination SIP URI. Required when `kind` is `sip`.
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Existing leg to transfer to. Reserved for future use.
+        custom_headers:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Custom Headers
+          description: Custom SIP headers to attach to the outbound leg (`sip` targets only).
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      title: TransferTarget
+      example:
+        kind: pstn
+        number: '+14155559876'
+    TransferRequest:
+      properties:
+        target:
+          $ref: '#/components/schemas/TransferTarget'
+          description: Where to transfer the call.
+        mode:
+          type: string
+          enum:
+          - cold
+          - warm
+          - monitor
+          title: Mode
+          description: Transfer mode. Only `cold` is currently supported.
+          default: cold
+        timeout:
+          type: integer
+          maximum: 600.0
+          minimum: 1.0
+          title: Timeout
+          description: Seconds to wait for the target to answer before failing (1–600).
+          default: 30
+        record:
+          anyOf:
+          - type: boolean
+          - type: string
+            enum:
+            - mono
+            - stereo
+            - per_leg
+          - type: 'null'
+          title: Record
+          description: Override recording for the transferred call. Boolean, or a channel layout.
+        ringback:
+          anyOf:
+          - type: string
+            enum:
+            - suppress
+            - passthrough
+          - type: 'null'
+          title: Ringback
+          description: Whether the caller hears ringback while the target is dialed.
+          default: suppress
+        dial_music:
+          anyOf:
+          - $ref: '#/components/schemas/TransferNestedAction'
+          - type: 'null'
+          description: Audio to play to the caller while the target is being dialed.
+        confirm_sound:
+          anyOf:
+          - $ref: '#/components/schemas/TransferNestedAction'
+          - type: 'null'
+          description: Audio the target hears before the call is bridged.
+        on_failure:
+          anyOf:
+          - $ref: '#/components/schemas/TransferNestedAction'
+          - type: 'null'
+          description: Action to run on the caller if the transfer fails.
+      additionalProperties: false
+      type: object
+      required:
+      - target
+      title: TransferRequest
+      example:
+        mode: cold
+        target:
+          kind: pstn
+          number: '+14155559876'
+        timeout: 30
+    TransferAccepted:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Identifier of the transfer operation (`op_` prefix).
+        call_id:
+          type: string
+          title: Call Id
+          description: The call being transferred (`cs_` prefix).
+        status:
+          type: string
+          const: initiated
+          title: Status
+          description: Always `initiated` when the transfer is accepted.
+        target_leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Target Leg Id
+          description: Identifier of the target leg once it is created, if available.
+        mode:
+          type: string
+          enum:
+          - cold
+          - warm
+          - monitor
+          title: Mode
+          description: The transfer mode that was applied.
+        request_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Request Id
+          description: Identifier for this control request, for correlating retries and webhooks.
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - call_id
+      - status
+      - mode
+      title: TransferAccepted
+      example:
+        call_id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+        id: op_01JQ8Z9K7M3N2P4R5S6T7V8WOP
+        mode: cold
+        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
+        status: initiated
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your secret account API key. Create one in the Teler dashboard.
