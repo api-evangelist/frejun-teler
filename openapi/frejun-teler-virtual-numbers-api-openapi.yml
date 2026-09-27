@@ -261,6 +261,32 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
+    LocationResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        region_code:
+          type: string
+          title: Region Code
+        country_code:
+          type: string
+          title: Country Code
+        country_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country Name
+      type: object
+      required:
+      - id
+      - name
+      - region_code
+      - country_code
+      title: LocationResponse
     ValidationFieldError:
       properties:
         loc:
@@ -283,6 +309,23 @@ components:
       - type
       title: ValidationFieldError
       description: One field-level problem within a `422` validation error.
+    UnassignVNsRequest:
+      properties:
+        vn_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Vn Ids
+        apply_to_all:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apply To All
+          default: false
+      type: object
+      title: UnassignVNsRequest
     ValidationErrorResponse:
       properties:
         success:
@@ -315,6 +358,19 @@ components:
           type: string_pattern_mismatch
         message: Validation Error
         success: false
+    SipTrunkListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: SipTrunkListResponse
     VNUpdate:
       properties:
         name:
@@ -326,80 +382,6 @@ components:
       additionalProperties: false
       type: object
       title: VNUpdate
-    UnassignVNsRequest:
-      properties:
-        vn_ids:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Vn Ids
-        apply_to_all:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Apply To All
-          default: false
-      type: object
-      title: UnassignVNsRequest
-    VNResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-        number:
-          type: string
-          title: Number
-        sip_trunk:
-          anyOf:
-          - $ref: '#/components/schemas/SipTrunkListResponse'
-          - type: 'null'
-        voice_app:
-          anyOf:
-          - $ref: '#/components/schemas/CallAppListResponse'
-          - type: 'null'
-        location:
-          $ref: '#/components/schemas/LocationResponse'
-      type: object
-      required:
-      - id
-      - name
-      - number
-      - location
-      title: VNResponse
-    CursorPage_VNListResponse_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/VNListResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[VNListResponse]
     VNListResponse:
       properties:
         id:
@@ -434,6 +416,47 @@ components:
       - voice_app
       - sip_trunk
       title: VNListResponse
+    DefaultResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - success
+      - message
+      title: DefaultResponse
+    VNResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        number:
+          type: string
+          title: Number
+        sip_trunk:
+          anyOf:
+          - $ref: '#/components/schemas/SipTrunkListResponse'
+          - type: 'null'
+        voice_app:
+          anyOf:
+          - $ref: '#/components/schemas/CallAppListResponse'
+          - type: 'null'
+        location:
+          $ref: '#/components/schemas/LocationResponse'
+      type: object
+      required:
+      - id
+      - name
+      - number
+      - location
+      title: VNResponse
     CallAppListResponse:
       properties:
         id:
@@ -447,6 +470,35 @@ components:
       - id
       - name
       title: CallAppListResponse
+    CursorPage_VNListResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/VNListResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[VNListResponse]
     AssignVNsRequest:
       properties:
         vn_ids:
@@ -474,58 +526,6 @@ components:
           title: Sip Trunk Id
       type: object
       title: AssignVNsRequest
-    DefaultResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-        message:
-          type: string
-          title: Message
-      type: object
-      required:
-      - success
-      - message
-      title: DefaultResponse
-    LocationResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-        region_code:
-          type: string
-          title: Region Code
-        country_code:
-          type: string
-          title: Country Code
-        country_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Country Name
-      type: object
-      required:
-      - id
-      - name
-      - region_code
-      - country_code
-      title: LocationResponse
-    SipTrunkListResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-      type: object
-      required:
-      - id
-      - name
-      title: SipTrunkListResponse
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

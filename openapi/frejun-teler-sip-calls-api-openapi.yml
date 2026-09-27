@@ -173,6 +173,28 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
     ErrorResponse:
       properties:
         success:
@@ -204,28 +226,6 @@ components:
       example:
         message: The requested call was not found.
         success: false
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
     ValidationErrorResponse:
       properties:
         success:
@@ -287,21 +287,6 @@ components:
       required:
       - data
       title: CursorPage[SipCallResponse]
-    CallSessionState:
-      type: string
-      enum:
-      - initiated
-      - ringing
-      - answered
-      - completed
-      - failed
-      title: CallSessionState
-    CallDirection:
-      type: string
-      enum:
-      - inbound
-      - outbound
-      title: CallDirection
     SipCallResponse:
       properties:
         id:
@@ -403,6 +388,21 @@ components:
         sip_trunk_id: st_01JQ8Z9K7M3N2P4R5S6T7V8WMN
         state: completed
         to_number: '+14155559876'
+    CallSessionState:
+      type: string
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - completed
+      - failed
+      title: CallSessionState
+    CallDirection:
+      type: string
+      enum:
+      - inbound
+      - outbound
+      title: CallDirection
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

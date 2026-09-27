@@ -302,6 +302,147 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
+    IpAclUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 64
+            minLength: 1
+          - type: 'null'
+          title: Name
+        addresses:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/IpAclEntryInput'
+            type: array
+            minItems: 1
+          - type: 'null'
+          title: Addresses
+          description: When supplied, replaces the full set of addresses.
+      additionalProperties: false
+      type: object
+      title: IpAclUpdate
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    IpAclCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Name
+          description: Unique name for this ACL within your account.
+        addresses:
+          items:
+            $ref: '#/components/schemas/IpAclEntryInput'
+          type: array
+          minItems: 1
+          title: Addresses
+          description: At least one address or CIDR network.
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - addresses
+      title: IpAclCreate
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    IpAclEntryResponse:
+      properties:
+        address:
+          type: string
+          title: Address
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+      type: object
+      required:
+      - address
+      title: IpAclEntryResponse
     IpAclResponse:
       properties:
         id:
@@ -339,194 +480,6 @@ components:
       - id
       - name
       title: IpAclResponse
-    ErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false` on an error response.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Human-readable description of what went wrong. Safe to show to a user.
-        code:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Code
-          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
-        type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Type
-          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
-      type: object
-      required:
-      - message
-      title: ErrorResponse
-      description: Standard error envelope returned for all non-validation errors.
-      example:
-        message: The requested call was not found.
-        success: false
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
-      type: object
-      required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
-    CursorPage_IpAclListResponse_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/IpAclListResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[IpAclListResponse]
-    IpAclEntryResponse:
-      properties:
-        address:
-          type: string
-          title: Address
-        description:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Description
-      type: object
-      required:
-      - address
-      title: IpAclEntryResponse
-    IpAclUpdate:
-      properties:
-        name:
-          anyOf:
-          - type: string
-            maxLength: 64
-            minLength: 1
-          - type: 'null'
-          title: Name
-        addresses:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/IpAclEntryInput'
-            type: array
-            minItems: 1
-          - type: 'null'
-          title: Addresses
-          description: When supplied, replaces the full set of addresses.
-      additionalProperties: false
-      type: object
-      title: IpAclUpdate
-    IpAclCreate:
-      properties:
-        name:
-          type: string
-          maxLength: 64
-          minLength: 1
-          title: Name
-          description: Unique name for this ACL within your account.
-        addresses:
-          items:
-            $ref: '#/components/schemas/IpAclEntryInput'
-          type: array
-          minItems: 1
-          title: Addresses
-          description: At least one address or CIDR network.
-      additionalProperties: false
-      type: object
-      required:
-      - name
-      - addresses
-      title: IpAclCreate
-    IpAclEntryInput:
-      properties:
-        address:
-          type: string
-          title: Address
-          description: IPv4/IPv6 address or CIDR network, e.g. `203.0.113.7` or `203.0.113.0/24`. CIDR networks are stored in canonical form (host bits stripped).
-        description:
-          anyOf:
-          - type: string
-            maxLength: 255
-          - type: 'null'
-          title: Description
-          description: Optional note, e.g. the carrier or PoP.
-      additionalProperties: false
-      type: object
-      required:
-      - address
-      title: IpAclEntryInput
     DefaultResponse:
       properties:
         success:
@@ -568,6 +521,53 @@ components:
       - id
       - name
       title: IpAclListResponse
+    CursorPage_IpAclListResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/IpAclListResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[IpAclListResponse]
+    IpAclEntryInput:
+      properties:
+        address:
+          type: string
+          title: Address
+          description: IPv4/IPv6 address or CIDR network, e.g. `203.0.113.7` or `203.0.113.0/24`. CIDR networks are stored in canonical form (host bits stripped).
+        description:
+          anyOf:
+          - type: string
+            maxLength: 255
+          - type: 'null'
+          title: Description
+          description: Optional note, e.g. the carrier or PoP.
+      additionalProperties: false
+      type: object
+      required:
+      - address
+      title: IpAclEntryInput
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

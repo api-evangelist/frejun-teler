@@ -286,35 +286,70 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    CursorPage_CallLegResponse_:
+    CallInitiateData:
       properties:
-        data:
-          items:
-            $ref: '#/components/schemas/CallLegResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
+        id:
+          type: string
+          title: Id
+          description: Identifier of the newly created call (`cs_` prefix).
+        from_number:
+          type: string
+          title: From Number
+          description: The number the call is placed from.
+        to_number:
+          type: string
+          title: To Number
+          description: The number being dialed.
+        status_callback_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Status Callback Url
+          description: Where status webhooks will be delivered.
+        record:
           type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
+          title: Record
+          description: Whether the call is being recorded.
       type: object
       required:
-      - data
-      title: CursorPage[CallLegResponse]
+      - id
+      - from_number
+      - to_number
+      - status_callback_url
+      - record
+      title: CallInitiateData
+    CallLegRole:
+      type: string
+      enum:
+      - primary
+      - dial_target
+      - transfer_target
+      - monitor
+      - parked
+      title: CallLegRole
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
     ErrorResponse:
       properties:
         success:
@@ -346,28 +381,6 @@ components:
       example:
         message: The requested call was not found.
         success: false
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
     ValidationErrorResponse:
       properties:
         success:
@@ -400,28 +413,35 @@ components:
           type: string_pattern_mismatch
         message: Validation Error
         success: false
-    CallInitiateResponse:
+    CursorPage_CallLegResponse_:
       properties:
-        message:
-          type: string
-          title: Message
-          description: Human-readable confirmation message.
         data:
-          $ref: '#/components/schemas/CallInitiateData'
-          description: Details of the accepted call.
+          items:
+            $ref: '#/components/schemas/CallLegResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
       type: object
       required:
-      - message
       - data
-      title: CallInitiateResponse
-      example:
-        data:
-          from_number: '+14155552671'
-          id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
-          record: true
-          status_callback_url: https://yourapp.com/callback
-          to_number: '+14155559876'
-        message: Call initiated successfully
+      title: CursorPage[CallLegResponse]
     CallSessionResponse:
       properties:
         id:
@@ -512,30 +532,83 @@ components:
         state: answered
         to_number: '+14155559876'
         voice_app_id: va_01JQ8Z9K7M3N2P4R5S6T7V8WKL
-    CallLegRole:
-      type: string
-      enum:
-      - primary
-      - dial_target
-      - transfer_target
-      - monitor
-      - parked
-      title: CallLegRole
-    CallDirection:
-      type: string
-      enum:
-      - inbound
-      - outbound
-      title: CallDirection
-    CallSessionState:
-      type: string
-      enum:
-      - initiated
-      - ringing
-      - answered
-      - completed
-      - failed
-      title: CallSessionState
+    CallInitiateRequest:
+      properties:
+        from_number:
+          type: string
+          maxLength: 16
+          minLength: 8
+          pattern: ^\+\d{7,15}$
+          title: From Number
+          description: The number to place the call from, in E.164 format. Must be a number you own.
+        to_number:
+          type: string
+          maxLength: 16
+          minLength: 8
+          pattern: ^\+\d{7,15}$
+          title: To Number
+          description: The destination number to dial, in E.164 format.
+        flow_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Flow Url
+          description: HTTPS URL Teler fetches when the call connects to obtain the call flow that drives the call.
+        status_callback_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Status Callback Url
+          description: HTTPS URL that receives status webhooks for the lifetime of the call.
+        record:
+          type: boolean
+          title: Record
+          description: Whether to record the call. Defaults to `true`.
+          default: true
+      type: object
+      required:
+      - from_number
+      - to_number
+      - flow_url
+      - status_callback_url
+      title: CallInitiateRequest
+      example:
+        flow_url: https://example.com/flows/123
+        from_number: '+14155552671'
+        record: true
+        status_callback_url: https://yourapp.com/callback
+        to_number: '+14155559876'
+    CursorPage_CallSessionResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/CallSessionResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[CallSessionResponse]
     CallLegResponse:
       properties:
         id:
@@ -631,116 +704,21 @@ components:
         role: primary
         state: answered
         to_number: '+14155559876'
-    CallInitiateData:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Identifier of the newly created call (`cs_` prefix).
-        from_number:
-          type: string
-          title: From Number
-          description: The number the call is placed from.
-        to_number:
-          type: string
-          title: To Number
-          description: The number being dialed.
-        status_callback_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Status Callback Url
-          description: Where status webhooks will be delivered.
-        record:
-          type: boolean
-          title: Record
-          description: Whether the call is being recorded.
-      type: object
-      required:
-      - id
-      - from_number
-      - to_number
-      - status_callback_url
-      - record
-      title: CallInitiateData
-    CursorPage_CallSessionResponse_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/CallSessionResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[CallSessionResponse]
-    CallInitiateRequest:
-      properties:
-        from_number:
-          type: string
-          maxLength: 16
-          minLength: 8
-          pattern: ^\+\d{7,15}$
-          title: From Number
-          description: The number to place the call from, in E.164 format. Must be a number you own.
-        to_number:
-          type: string
-          maxLength: 16
-          minLength: 8
-          pattern: ^\+\d{7,15}$
-          title: To Number
-          description: The destination number to dial, in E.164 format.
-        flow_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Flow Url
-          description: HTTPS URL Teler fetches when the call connects to obtain the call flow that drives the call.
-        status_callback_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Status Callback Url
-          description: HTTPS URL that receives status webhooks for the lifetime of the call.
-        record:
-          type: boolean
-          title: Record
-          description: Whether to record the call. Defaults to `true`.
-          default: true
-      type: object
-      required:
-      - from_number
-      - to_number
-      - flow_url
-      - status_callback_url
-      title: CallInitiateRequest
-      example:
-        flow_url: https://example.com/flows/123
-        from_number: '+14155552671'
-        record: true
-        status_callback_url: https://yourapp.com/callback
-        to_number: '+14155559876'
+    CallSessionState:
+      type: string
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - completed
+      - failed
+      title: CallSessionState
+    CallDirection:
+      type: string
+      enum:
+      - inbound
+      - outbound
+      title: CallDirection
     CallLegState:
       type: string
       enum:
@@ -750,6 +728,28 @@ components:
       - completed
       - failed
       title: CallLegState
+    CallInitiateResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Human-readable confirmation message.
+        data:
+          $ref: '#/components/schemas/CallInitiateData'
+          description: Details of the accepted call.
+      type: object
+      required:
+      - message
+      - data
+      title: CallInitiateResponse
+      example:
+        data:
+          from_number: '+14155552671'
+          id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+          record: true
+          status_callback_url: https://yourapp.com/callback
+          to_number: '+14155559876'
+        message: Call initiated successfully
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

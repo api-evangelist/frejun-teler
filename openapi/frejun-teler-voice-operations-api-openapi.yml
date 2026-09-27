@@ -104,6 +104,28 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
     ErrorResponse:
       properties:
         success:
@@ -135,28 +157,6 @@ components:
       example:
         message: The requested call was not found.
         success: false
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
     ValidationErrorResponse:
       properties:
         success:
@@ -233,50 +233,55 @@ components:
       required:
       - action
       title: TransferNestedAction
-    TransferTarget:
+    TransferAccepted:
       properties:
-        kind:
+        id:
+          type: string
+          title: Id
+          description: Identifier of the transfer operation (`op_` prefix).
+        call_id:
+          type: string
+          title: Call Id
+          description: The call being transferred (`cs_` prefix).
+        status:
+          type: string
+          const: initiated
+          title: Status
+          description: Always `initiated` when the transfer is accepted.
+        target_leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Target Leg Id
+          description: Identifier of the target leg once it is created, if available.
+        mode:
           type: string
           enum:
-          - pstn
-          - sip
-          - leg
-          title: Kind
-          description: Destination type. `pstn` requires `number`; `sip` requires `uri`. `leg` is not yet supported.
-        number:
+          - cold
+          - warm
+          - monitor
+          title: Mode
+          description: The transfer mode that was applied.
+        request_id:
           anyOf:
           - type: string
           - type: 'null'
-          title: Number
-          description: Destination phone number in E.164 format. Required when `kind` is `pstn`.
-        uri:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Uri
-          description: Destination SIP URI. Required when `kind` is `sip`.
-        leg_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Leg Id
-          description: Existing leg to transfer to. Reserved for future use.
-        custom_headers:
-          anyOf:
-          - additionalProperties:
-              type: string
-            type: object
-          - type: 'null'
-          title: Custom Headers
-          description: Custom SIP headers to attach to the outbound leg (`sip` targets only).
+          title: Request Id
+          description: Identifier for this control request, for correlating retries and webhooks.
       additionalProperties: false
       type: object
       required:
-      - kind
-      title: TransferTarget
+      - id
+      - call_id
+      - status
+      - mode
+      title: TransferAccepted
       example:
-        kind: pstn
-        number: '+14155559876'
+        call_id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+        id: op_01JQ8Z9K7M3N2P4R5S6T7V8WOP
+        mode: cold
+        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
+        status: initiated
     TransferRequest:
       properties:
         target:
@@ -345,55 +350,50 @@ components:
           kind: pstn
           number: '+14155559876'
         timeout: 30
-    TransferAccepted:
+    TransferTarget:
       properties:
-        id:
-          type: string
-          title: Id
-          description: Identifier of the transfer operation (`op_` prefix).
-        call_id:
-          type: string
-          title: Call Id
-          description: The call being transferred (`cs_` prefix).
-        status:
-          type: string
-          const: initiated
-          title: Status
-          description: Always `initiated` when the transfer is accepted.
-        target_leg_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Target Leg Id
-          description: Identifier of the target leg once it is created, if available.
-        mode:
+        kind:
           type: string
           enum:
-          - cold
-          - warm
-          - monitor
-          title: Mode
-          description: The transfer mode that was applied.
-        request_id:
+          - pstn
+          - sip
+          - leg
+          title: Kind
+          description: Destination type. `pstn` requires `number`; `sip` requires `uri`. `leg` is not yet supported.
+        number:
           anyOf:
           - type: string
           - type: 'null'
-          title: Request Id
-          description: Identifier for this control request, for correlating retries and webhooks.
+          title: Number
+          description: Destination phone number in E.164 format. Required when `kind` is `pstn`.
+        uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uri
+          description: Destination SIP URI. Required when `kind` is `sip`.
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Existing leg to transfer to. Reserved for future use.
+        custom_headers:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Custom Headers
+          description: Custom SIP headers to attach to the outbound leg (`sip` targets only).
       additionalProperties: false
       type: object
       required:
-      - id
-      - call_id
-      - status
-      - mode
-      title: TransferAccepted
+      - kind
+      title: TransferTarget
       example:
-        call_id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
-        id: op_01JQ8Z9K7M3N2P4R5S6T7V8WOP
-        mode: cold
-        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
-        status: initiated
+        kind: pstn
+        number: '+14155559876'
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
