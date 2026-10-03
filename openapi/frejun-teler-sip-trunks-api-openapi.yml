@@ -254,7 +254,43 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    LocationResponse:
+    SipTransport:
+      type: string
+      enum:
+      - tls
+      - tcp
+      - udp
+      title: SipTransport
+    CursorPage_VNListResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/VNListResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[VNListResponse]
+    SipTrunkListResponse:
       properties:
         id:
           type: string
@@ -262,69 +298,11 @@ components:
         name:
           type: string
           title: Name
-        region_code:
-          type: string
-          title: Region Code
-        country_code:
-          type: string
-          title: Country Code
-        country_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Country Name
       type: object
       required:
       - id
       - name
-      - region_code
-      - country_code
-      title: LocationResponse
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    InboundRoute:
-      properties:
-        name:
-          type: string
-          minLength: 1
-          title: Name
-          description: Route name
-        sip_url:
-          type: string
-          minLength: 1
-          title: Sip Url
-          description: SIP destination URL or endpoint
-        sip_user:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sip User
-          description: SIP user name
-      type: object
-      required:
-      - name
-      - sip_url
-      title: InboundRoute
+      title: SipTrunkListResponse
     ValidationErrorResponse:
       properties:
         success:
@@ -357,6 +335,29 @@ components:
           type: string_pattern_mismatch
         message: Validation Error
         success: false
+    Status:
+      type: string
+      enum:
+      - active
+      - inactive
+      title: Status
+    SipAuthCredentialInput:
+      properties:
+        username:
+          type: string
+          minLength: 5
+          title: Username
+          description: SIP authentication username
+        password:
+          type: string
+          minLength: 5
+          title: Password
+          description: SIP authentication password
+      type: object
+      required:
+      - username
+      - password
+      title: SipAuthCredentialInput
     CursorPage_SipTrunkResponse_:
       properties:
         data:
@@ -386,23 +387,64 @@ components:
       required:
       - data
       title: CursorPage[SipTrunkResponse]
-    SipAuthAddressInput:
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    DefaultResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - success
+      - message
+      title: DefaultResponse
+    InboundRoute:
       properties:
         name:
           type: string
           minLength: 1
           title: Name
-          description: Authentication address name
-        address:
+          description: Route name
+        sip_url:
           type: string
           minLength: 1
-          title: Address
-          description: IP or hostname for SIP auth
+          title: Sip Url
+          description: SIP destination URL or endpoint
+        sip_user:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sip User
+          description: SIP user name
       type: object
       required:
       - name
-      - address
-      title: SipAuthAddressInput
+      - sip_url
+      title: InboundRoute
     SipTrunkResponse:
       properties:
         id:
@@ -521,14 +563,7 @@ components:
       - is_active
       - webhook_api_version
       title: SipTrunkResponse
-    SipTransport:
-      type: string
-      enum:
-      - tls
-      - tcp
-      - udp
-      title: SipTransport
-    SipTrunkListResponse:
+    LocationResponse:
       properties:
         id:
           type: string
@@ -536,64 +571,24 @@ components:
         name:
           type: string
           title: Name
+        region_code:
+          type: string
+          title: Region Code
+        country_code:
+          type: string
+          title: Country Code
+        country_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country Name
       type: object
       required:
       - id
       - name
-      title: SipTrunkListResponse
-    AuthenticationType:
-      type: string
-      enum:
-      - credential
-      - IP
-      title: AuthenticationType
-    VNListResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        account_id:
-          type: string
-          title: Account Id
-        name:
-          type: string
-          title: Name
-        number:
-          type: string
-          title: Number
-        location:
-          $ref: '#/components/schemas/LocationResponse'
-        voice_app:
-          anyOf:
-          - $ref: '#/components/schemas/CallAppListResponse'
-          - type: 'null'
-        sip_trunk:
-          anyOf:
-          - $ref: '#/components/schemas/SipTrunkListResponse'
-          - type: 'null'
-      type: object
-      required:
-      - id
-      - account_id
-      - name
-      - number
-      - location
-      - voice_app
-      - sip_trunk
-      title: VNListResponse
-    DefaultResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-        message:
-          type: string
-          title: Message
-      type: object
-      required:
-      - success
-      - message
-      title: DefaultResponse
+      - region_code
+      - country_code
+      title: LocationResponse
     SipTrunkUpdate:
       properties:
         name:
@@ -676,36 +671,6 @@ components:
       additionalProperties: false
       type: object
       title: SipTrunkUpdate
-    CallAppListResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-      type: object
-      required:
-      - id
-      - name
-      title: CallAppListResponse
-    SipAuthCredentialInput:
-      properties:
-        username:
-          type: string
-          minLength: 5
-          title: Username
-          description: SIP authentication username
-        password:
-          type: string
-          minLength: 5
-          title: Password
-          description: SIP authentication password
-      type: object
-      required:
-      - username
-      - password
-      title: SipAuthCredentialInput
     SipTrunkCreate:
       properties:
         name:
@@ -790,41 +755,76 @@ components:
       - domain_name
       - authentication_type
       title: SipTrunkCreate
-    Status:
-      type: string
-      enum:
-      - active
-      - inactive
-      title: Status
-    CursorPage_VNListResponse_:
+    SipAuthAddressInput:
       properties:
-        data:
-          items:
-            $ref: '#/components/schemas/VNListResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
+        name:
+          type: string
+          minLength: 1
+          title: Name
+          description: Authentication address name
+        address:
+          type: string
+          minLength: 1
+          title: Address
+          description: IP or hostname for SIP auth
       type: object
       required:
-      - data
-      title: CursorPage[VNListResponse]
+      - name
+      - address
+      title: SipAuthAddressInput
+    VNListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        account_id:
+          type: string
+          title: Account Id
+        name:
+          type: string
+          title: Name
+        number:
+          type: string
+          title: Number
+        location:
+          $ref: '#/components/schemas/LocationResponse'
+        voice_app:
+          anyOf:
+          - $ref: '#/components/schemas/CallAppListResponse'
+          - type: 'null'
+        sip_trunk:
+          anyOf:
+          - $ref: '#/components/schemas/SipTrunkListResponse'
+          - type: 'null'
+      type: object
+      required:
+      - id
+      - account_id
+      - name
+      - number
+      - location
+      - voice_app
+      - sip_trunk
+      title: VNListResponse
+    AuthenticationType:
+      type: string
+      enum:
+      - credential
+      - IP
+      title: AuthenticationType
+    CallAppListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: CallAppListResponse
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

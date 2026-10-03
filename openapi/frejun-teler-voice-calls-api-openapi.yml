@@ -286,162 +286,6 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    CallInitiateData:
-      properties:
-        id:
-          type: string
-          title: Id
-          description: Identifier of the newly created call (`cs_` prefix).
-        from_number:
-          type: string
-          title: From Number
-          description: The number the call is placed from.
-        to_number:
-          type: string
-          title: To Number
-          description: The number being dialed.
-        status_callback_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Status Callback Url
-          description: Where status webhooks will be delivered.
-        record:
-          type: boolean
-          title: Record
-          description: Whether the call is being recorded.
-      type: object
-      required:
-      - id
-      - from_number
-      - to_number
-      - status_callback_url
-      - record
-      title: CallInitiateData
-    CallLegRole:
-      type: string
-      enum:
-      - primary
-      - dial_target
-      - transfer_target
-      - monitor
-      - parked
-      title: CallLegRole
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    ErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false` on an error response.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Human-readable description of what went wrong. Safe to show to a user.
-        code:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Code
-          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
-        type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Type
-          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
-      type: object
-      required:
-      - message
-      title: ErrorResponse
-      description: Standard error envelope returned for all non-validation errors.
-      example:
-        message: The requested call was not found.
-        success: false
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
-      type: object
-      required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
-    CursorPage_CallLegResponse_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/CallLegResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[CallLegResponse]
     CallSessionResponse:
       properties:
         id:
@@ -532,6 +376,15 @@ components:
         state: answered
         to_number: '+14155559876'
         voice_app_id: va_01JQ8Z9K7M3N2P4R5S6T7V8WKL
+    CallLegRole:
+      type: string
+      enum:
+      - primary
+      - dial_target
+      - transfer_target
+      - monitor
+      - parked
+      title: CallLegRole
     CallInitiateRequest:
       properties:
         from_number:
@@ -580,6 +433,69 @@ components:
         record: true
         status_callback_url: https://yourapp.com/callback
         to_number: '+14155559876'
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    CallLegState:
+      type: string
+      enum:
+      - created
+      - ringing
+      - answered
+      - completed
+      - failed
+      title: CallLegState
     CursorPage_CallSessionResponse_:
       properties:
         data:
@@ -609,6 +525,108 @@ components:
       required:
       - data
       title: CursorPage[CallSessionResponse]
+    CallSessionState:
+      type: string
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - completed
+      - failed
+      title: CallSessionState
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    CursorPage_CallLegResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/CallLegResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[CallLegResponse]
+    CallInitiateData:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Identifier of the newly created call (`cs_` prefix).
+        from_number:
+          type: string
+          title: From Number
+          description: The number the call is placed from.
+        to_number:
+          type: string
+          title: To Number
+          description: The number being dialed.
+        status_callback_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Status Callback Url
+          description: Where status webhooks will be delivered.
+        record:
+          type: boolean
+          title: Record
+          description: Whether the call is being recorded.
+      type: object
+      required:
+      - id
+      - from_number
+      - to_number
+      - status_callback_url
+      - record
+      title: CallInitiateData
     CallLegResponse:
       properties:
         id:
@@ -704,30 +722,12 @@ components:
         role: primary
         state: answered
         to_number: '+14155559876'
-    CallSessionState:
-      type: string
-      enum:
-      - initiated
-      - ringing
-      - answered
-      - completed
-      - failed
-      title: CallSessionState
     CallDirection:
       type: string
       enum:
       - inbound
       - outbound
       title: CallDirection
-    CallLegState:
-      type: string
-      enum:
-      - created
-      - ringing
-      - answered
-      - completed
-      - failed
-      title: CallLegState
     CallInitiateResponse:
       properties:
         message:

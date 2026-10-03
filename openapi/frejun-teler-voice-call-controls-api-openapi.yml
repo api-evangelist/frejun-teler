@@ -304,6 +304,38 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
     ValidationFieldError:
       properties:
         loc:
@@ -326,6 +358,96 @@ components:
       - type
       title: ValidationFieldError
       description: One field-level problem within a `422` validation error.
+    MutationAccepted:
+      properties:
+        request_id:
+          type: string
+          title: Request Id
+          description: Identifier for this control request. Reuse it to correlate retries and webhooks.
+        playback_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playback Id
+          description: Identifier of the started playback (`pb_` prefix). Only returned by the play action.
+      additionalProperties: false
+      type: object
+      required:
+      - request_id
+      title: MutationAccepted
+      example:
+        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
+    MuteRequest:
+      properties:
+        leg_id:
+          type: string
+          title: Leg Id
+          description: Leg to mute or unmute (`cl_` prefix).
+        'on':
+          type: boolean
+          title: 'On'
+          description: '`true` to mute the leg, `false` to unmute it.'
+      additionalProperties: false
+      type: object
+      required:
+      - leg_id
+      - 'on'
+      title: MuteRequest
+      example:
+        leg_id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
+        'on': true
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
+    HangupRequest:
+      properties:
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Leg to hang up (`cl_` prefix). Omit to end the entire call.
+        reason:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[A-Z0-9_]+$
+          - type: 'null'
+          title: Reason
+          description: Optional machine-readable reason, e.g. `AGENT_HANGUP`. Uppercase, digits, and underscores only.
+      additionalProperties: false
+      type: object
+      title: HangupRequest
+      example:
+        reason: AGENT_HANGUP
     PlayRequest:
       properties:
         leg_id:
@@ -365,88 +487,6 @@ components:
         loop: 1
         media_url: https://example.com/audio/greeting.wav
         on_dtmf: stop
-    ErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false` on an error response.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Human-readable description of what went wrong. Safe to show to a user.
-        code:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Code
-          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
-        type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Type
-          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
-      type: object
-      required:
-      - message
-      title: ErrorResponse
-      description: Standard error envelope returned for all non-validation errors.
-      example:
-        message: The requested call was not found.
-        success: false
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
-      type: object
-      required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
-    MutationAccepted:
-      properties:
-        request_id:
-          type: string
-          title: Request Id
-          description: Identifier for this control request. Reuse it to correlate retries and webhooks.
-        playback_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playback Id
-          description: Identifier of the started playback (`pb_` prefix). Only returned by the play action.
-      additionalProperties: false
-      type: object
-      required:
-      - request_id
-      title: MutationAccepted
-      example:
-        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
     DtmfRequest:
       properties:
         leg_id:
@@ -477,46 +517,6 @@ components:
       example:
         digits: 1234#
         duration_ms: 120
-    MuteRequest:
-      properties:
-        leg_id:
-          type: string
-          title: Leg Id
-          description: Leg to mute or unmute (`cl_` prefix).
-        'on':
-          type: boolean
-          title: 'On'
-          description: '`true` to mute the leg, `false` to unmute it.'
-      additionalProperties: false
-      type: object
-      required:
-      - leg_id
-      - 'on'
-      title: MuteRequest
-      example:
-        leg_id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
-        'on': true
-    HangupRequest:
-      properties:
-        leg_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Leg Id
-          description: Leg to hang up (`cl_` prefix). Omit to end the entire call.
-        reason:
-          anyOf:
-          - type: string
-            maxLength: 64
-            pattern: ^[A-Z0-9_]+$
-          - type: 'null'
-          title: Reason
-          description: Optional machine-readable reason, e.g. `AGENT_HANGUP`. Uppercase, digits, and underscores only.
-      additionalProperties: false
-      type: object
-      title: HangupRequest
-      example:
-        reason: AGENT_HANGUP
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

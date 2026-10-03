@@ -104,135 +104,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    ErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false` on an error response.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Human-readable description of what went wrong. Safe to show to a user.
-        code:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Code
-          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
-        type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Type
-          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
-      type: object
-      required:
-      - message
-      title: ErrorResponse
-      description: Standard error envelope returned for all non-validation errors.
-      example:
-        message: The requested call was not found.
-        success: false
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
-      type: object
-      required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
-    TransferNestedAction:
-      properties:
-        action:
-          type: string
-          enum:
-          - play
-          - say
-          - hangup
-          title: Action
-        media_url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Media Url
-        text:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Text
-        voice:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Voice
-        language:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Language
-        reason:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Reason
-        loop:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Loop
-      additionalProperties: false
-      type: object
-      required:
-      - action
-      title: TransferNestedAction
     TransferAccepted:
       properties:
         id:
@@ -282,6 +153,179 @@ components:
         mode: cold
         request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
         status: initiated
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    TransferNestedAction:
+      properties:
+        action:
+          type: string
+          enum:
+          - play
+          - say
+          - hangup
+          title: Action
+        media_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Media Url
+        text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Text
+        voice:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Voice
+        language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Language
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+        loop:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Loop
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      title: TransferNestedAction
+    TransferTarget:
+      properties:
+        kind:
+          type: string
+          enum:
+          - pstn
+          - sip
+          - leg
+          title: Kind
+          description: Destination type. `pstn` requires `number`; `sip` requires `uri`. `leg` is not yet supported.
+        number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Number
+          description: Destination phone number in E.164 format. Required when `kind` is `pstn`.
+        uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uri
+          description: Destination SIP URI. Required when `kind` is `sip`.
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Existing leg to transfer to. Reserved for future use.
+        custom_headers:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Custom Headers
+          description: Custom SIP headers to attach to the outbound leg (`sip` targets only).
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      title: TransferTarget
+      example:
+        kind: pstn
+        number: '+14155559876'
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
     TransferRequest:
       properties:
         target:
@@ -350,50 +394,6 @@ components:
           kind: pstn
           number: '+14155559876'
         timeout: 30
-    TransferTarget:
-      properties:
-        kind:
-          type: string
-          enum:
-          - pstn
-          - sip
-          - leg
-          title: Kind
-          description: Destination type. `pstn` requires `number`; `sip` requires `uri`. `leg` is not yet supported.
-        number:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Number
-          description: Destination phone number in E.164 format. Required when `kind` is `pstn`.
-        uri:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Uri
-          description: Destination SIP URI. Required when `kind` is `sip`.
-        leg_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Leg Id
-          description: Existing leg to transfer to. Reserved for future use.
-        custom_headers:
-          anyOf:
-          - additionalProperties:
-              type: string
-            type: object
-          - type: 'null'
-          title: Custom Headers
-          description: Custom SIP headers to attach to the outbound leg (`sip` targets only).
-      additionalProperties: false
-      type: object
-      required:
-      - kind
-      title: TransferTarget
-      example:
-        kind: pstn
-        number: '+14155559876'
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

@@ -173,59 +173,6 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    ErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false` on an error response.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Human-readable description of what went wrong. Safe to show to a user.
-        code:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Code
-          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
-        type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Type
-          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
-      type: object
-      required:
-      - message
-      title: ErrorResponse
-      description: Standard error envelope returned for all non-validation errors.
-      example:
-        message: The requested call was not found.
-        success: false
     ValidationErrorResponse:
       properties:
         success:
@@ -258,6 +205,28 @@ components:
           type: string_pattern_mismatch
         message: Validation Error
         success: false
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
     CursorPage_SipCallResponse_:
       properties:
         data:
@@ -397,6 +366,37 @@ components:
       - completed
       - failed
       title: CallSessionState
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
     CallDirection:
       type: string
       enum:

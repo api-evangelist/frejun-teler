@@ -258,54 +258,6 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    LocationResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-        region_code:
-          type: string
-          title: Region Code
-        country_code:
-          type: string
-          title: Country Code
-        country_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Country Name
-      type: object
-      required:
-      - id
-      - name
-      - region_code
-      - country_code
-      title: LocationResponse
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
     CursorPage_VNListResponse_:
       properties:
         data:
@@ -335,63 +287,19 @@ components:
       required:
       - data
       title: CursorPage[VNListResponse]
-    CallAppUpdate:
+    SipTrunkListResponse:
       properties:
+        id:
+          type: string
+          title: Id
         name:
-          anyOf:
-          - type: string
-            minLength: 1
-          - type: 'null'
+          type: string
           title: Name
-        flow_url:
-          anyOf:
-          - type: string
-            maxLength: 2083
-            minLength: 1
-            format: uri
-          - type: 'null'
-          title: Flow Url
-        webhook_url:
-          anyOf:
-          - type: string
-            maxLength: 2083
-            minLength: 1
-            format: uri
-          - type: 'null'
-          title: Webhook Url
-        fallback_url:
-          anyOf:
-          - type: string
-            maxLength: 2083
-            minLength: 1
-            format: uri
-          - type: 'null'
-          title: Fallback Url
-        status:
-          anyOf:
-          - $ref: '#/components/schemas/Status'
-          - type: 'null'
-        channel_limit:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Channel Limit
-        secret_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Secret Id
-        webhook_api_version:
-          anyOf:
-          - type: string
-            enum:
-            - '2025-08-01'
-            - '2026-06-01'
-          - type: 'null'
-          title: Webhook Api Version
-      additionalProperties: false
       type: object
-      title: CallAppUpdate
+      required:
+      - id
+      - name
+      title: SipTrunkListResponse
     ValidationErrorResponse:
       properties:
         success:
@@ -424,6 +332,12 @@ components:
           type: string_pattern_mismatch
         message: Validation Error
         success: false
+    Status:
+      type: string
+      enum:
+      - active
+      - inactive
+      title: Status
     CallAppResponse:
       properties:
         name:
@@ -493,7 +407,29 @@ components:
       - webhook_api_version
       - account_id
       title: CallAppResponse
-    SipTrunkListResponse:
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    LocationResponse:
       properties:
         id:
           type: string
@@ -501,11 +437,94 @@ components:
         name:
           type: string
           title: Name
+        region_code:
+          type: string
+          title: Region Code
+        country_code:
+          type: string
+          title: Country Code
+        country_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country Name
       type: object
       required:
       - id
       - name
-      title: SipTrunkListResponse
+      - region_code
+      - country_code
+      title: LocationResponse
+    DefaultResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - success
+      - message
+      title: DefaultResponse
+    CallAppUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Name
+        flow_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Flow Url
+        webhook_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Webhook Url
+        fallback_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Fallback Url
+        status:
+          anyOf:
+          - $ref: '#/components/schemas/Status'
+          - type: 'null'
+        channel_limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Channel Limit
+        secret_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Id
+        webhook_api_version:
+          anyOf:
+          - type: string
+            enum:
+            - '2025-08-01'
+            - '2026-06-01'
+          - type: 'null'
+          title: Webhook Api Version
+      additionalProperties: false
+      type: object
+      title: CallAppUpdate
     VNListResponse:
       properties:
         id:
@@ -540,38 +559,6 @@ components:
       - voice_app
       - sip_trunk
       title: VNListResponse
-    DefaultResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-        message:
-          type: string
-          title: Message
-      type: object
-      required:
-      - success
-      - message
-      title: DefaultResponse
-    CallAppListResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-      type: object
-      required:
-      - id
-      - name
-      title: CallAppListResponse
-    Status:
-      type: string
-      enum:
-      - active
-      - inactive
-      title: Status
     CursorPage_CallAppResponse_:
       properties:
         data:
@@ -659,6 +646,19 @@ components:
       - flow_url
       - webhook_url
       title: CallAppCreate
+    CallAppListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: CallAppListResponse
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
