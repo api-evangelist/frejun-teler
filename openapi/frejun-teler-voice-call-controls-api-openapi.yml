@@ -304,98 +304,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
-      type: object
-      required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    MutationAccepted:
-      properties:
-        request_id:
-          type: string
-          title: Request Id
-          description: Identifier for this control request. Reuse it to correlate retries and webhooks.
-        playback_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playback Id
-          description: Identifier of the started playback (`pb_` prefix). Only returned by the play action.
-      additionalProperties: false
-      type: object
-      required:
-      - request_id
-      title: MutationAccepted
-      example:
-        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
-    MuteRequest:
-      properties:
-        leg_id:
-          type: string
-          title: Leg Id
-          description: Leg to mute or unmute (`cl_` prefix).
-        'on':
-          type: boolean
-          title: 'On'
-          description: '`true` to mute the leg, `false` to unmute it.'
-      additionalProperties: false
-      type: object
-      required:
-      - leg_id
-      - 'on'
-      title: MuteRequest
-      example:
-        leg_id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
-        'on': true
     ErrorResponse:
       properties:
         success:
@@ -427,27 +335,47 @@ components:
       example:
         message: The requested call was not found.
         success: false
-    HangupRequest:
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
+    MuteRequest:
       properties:
         leg_id:
-          anyOf:
-          - type: string
-          - type: 'null'
+          type: string
           title: Leg Id
-          description: Leg to hang up (`cl_` prefix). Omit to end the entire call.
-        reason:
-          anyOf:
-          - type: string
-            maxLength: 64
-            pattern: ^[A-Z0-9_]+$
-          - type: 'null'
-          title: Reason
-          description: Optional machine-readable reason, e.g. `AGENT_HANGUP`. Uppercase, digits, and underscores only.
+          description: Leg to mute or unmute (`cl_` prefix).
+        'on':
+          type: boolean
+          title: 'On'
+          description: '`true` to mute the leg, `false` to unmute it.'
       additionalProperties: false
       type: object
-      title: HangupRequest
+      required:
+      - leg_id
+      - 'on'
+      title: MuteRequest
       example:
-        reason: AGENT_HANGUP
+        leg_id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
+        'on': true
     PlayRequest:
       properties:
         leg_id:
@@ -487,6 +415,46 @@ components:
         loop: 1
         media_url: https://example.com/audio/greeting.wav
         on_dtmf: stop
+    MutationAccepted:
+      properties:
+        request_id:
+          type: string
+          title: Request Id
+          description: Identifier for this control request. Reuse it to correlate retries and webhooks.
+        playback_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playback Id
+          description: Identifier of the started playback (`pb_` prefix). Only returned by the play action.
+      additionalProperties: false
+      type: object
+      required:
+      - request_id
+      title: MutationAccepted
+      example:
+        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
+    HangupRequest:
+      properties:
+        leg_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Leg Id
+          description: Leg to hang up (`cl_` prefix). Omit to end the entire call.
+        reason:
+          anyOf:
+          - type: string
+            maxLength: 64
+            pattern: ^[A-Z0-9_]+$
+          - type: 'null'
+          title: Reason
+          description: Optional machine-readable reason, e.g. `AGENT_HANGUP`. Uppercase, digits, and underscores only.
+      additionalProperties: false
+      type: object
+      title: HangupRequest
+      example:
+        reason: AGENT_HANGUP
     DtmfRequest:
       properties:
         leg_id:
@@ -517,6 +485,38 @@ components:
       example:
         digits: 1234#
         duration_ms: 120
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

@@ -258,155 +258,6 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    CursorPage_VNListResponse_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/VNListResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[VNListResponse]
-    SipTrunkListResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-      type: object
-      required:
-      - id
-      - name
-      title: SipTrunkListResponse
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
-      type: object
-      required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
-    Status:
-      type: string
-      enum:
-      - active
-      - inactive
-      title: Status
-    CallAppResponse:
-      properties:
-        name:
-          type: string
-          minLength: 1
-          title: Name
-        flow_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Flow Url
-        webhook_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
-          title: Webhook Url
-        fallback_url:
-          anyOf:
-          - type: string
-            maxLength: 2083
-            minLength: 1
-            format: uri
-          - type: 'null'
-          title: Fallback Url
-        id:
-          type: string
-          title: Id
-        status:
-          $ref: '#/components/schemas/Status'
-        channel_limit:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Channel Limit
-        vn_count:
-          type: integer
-          title: Vn Count
-          default: 0
-        secret_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Secret Id
-        secret_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Secret Name
-        webhook_api_version:
-          type: string
-          enum:
-          - '2025-08-01'
-          - '2026-06-01'
-          title: Webhook Api Version
-        account_id:
-          type: string
-          title: Account Id
-      type: object
-      required:
-      - name
-      - flow_url
-      - webhook_url
-      - id
-      - status
-      - webhook_api_version
-      - account_id
-      title: CallAppResponse
     ValidationFieldError:
       properties:
         loc:
@@ -429,32 +280,12 @@ components:
       - type
       title: ValidationFieldError
       description: One field-level problem within a `422` validation error.
-    LocationResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-        region_code:
-          type: string
-          title: Region Code
-        country_code:
-          type: string
-          title: Country Code
-        country_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Country Name
-      type: object
-      required:
-      - id
-      - name
-      - region_code
-      - country_code
-      title: LocationResponse
+    Status:
+      type: string
+      enum:
+      - active
+      - inactive
+      title: Status
     DefaultResponse:
       properties:
         success:
@@ -525,69 +356,6 @@ components:
       additionalProperties: false
       type: object
       title: CallAppUpdate
-    VNListResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        account_id:
-          type: string
-          title: Account Id
-        name:
-          type: string
-          title: Name
-        number:
-          type: string
-          title: Number
-        location:
-          $ref: '#/components/schemas/LocationResponse'
-        voice_app:
-          anyOf:
-          - $ref: '#/components/schemas/CallAppListResponse'
-          - type: 'null'
-        sip_trunk:
-          anyOf:
-          - $ref: '#/components/schemas/SipTrunkListResponse'
-          - type: 'null'
-      type: object
-      required:
-      - id
-      - account_id
-      - name
-      - number
-      - location
-      - voice_app
-      - sip_trunk
-      title: VNListResponse
-    CursorPage_CallAppResponse_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/CallAppResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[CallAppResponse]
     CallAppCreate:
       properties:
         name:
@@ -646,6 +414,75 @@ components:
       - flow_url
       - webhook_url
       title: CallAppCreate
+    CallAppResponse:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Name
+        flow_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Flow Url
+        webhook_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Webhook Url
+        fallback_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Fallback Url
+        id:
+          type: string
+          title: Id
+        status:
+          $ref: '#/components/schemas/Status'
+        channel_limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Channel Limit
+        vn_count:
+          type: integer
+          title: Vn Count
+          default: 0
+        secret_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Id
+        secret_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Name
+        webhook_api_version:
+          type: string
+          enum:
+          - '2025-08-01'
+          - '2026-06-01'
+          title: Webhook Api Version
+        account_id:
+          type: string
+          title: Account Id
+      type: object
+      required:
+      - name
+      - flow_url
+      - webhook_url
+      - id
+      - status
+      - webhook_api_version
+      - account_id
+      title: CallAppResponse
     CallAppListResponse:
       properties:
         id:
@@ -659,6 +496,169 @@ components:
       - id
       - name
       title: CallAppListResponse
+    LocationResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        region_code:
+          type: string
+          title: Region Code
+        country_code:
+          type: string
+          title: Country Code
+        country_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country Name
+      type: object
+      required:
+      - id
+      - name
+      - region_code
+      - country_code
+      title: LocationResponse
+    CursorPage_CallAppResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/CallAppResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[CallAppResponse]
+    VNListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        account_id:
+          type: string
+          title: Account Id
+        name:
+          type: string
+          title: Name
+        number:
+          type: string
+          title: Number
+        location:
+          $ref: '#/components/schemas/LocationResponse'
+        voice_app:
+          anyOf:
+          - $ref: '#/components/schemas/CallAppListResponse'
+          - type: 'null'
+        sip_trunk:
+          anyOf:
+          - $ref: '#/components/schemas/SipTrunkListResponse'
+          - type: 'null'
+      type: object
+      required:
+      - id
+      - account_id
+      - name
+      - number
+      - location
+      - voice_app
+      - sip_trunk
+      title: VNListResponse
+    SipTrunkListResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+      - id
+      - name
+      title: SipTrunkListResponse
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    CursorPage_VNListResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/VNListResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[VNListResponse]
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

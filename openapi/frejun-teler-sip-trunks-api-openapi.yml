@@ -254,139 +254,90 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    SipTransport:
-      type: string
-      enum:
-      - tls
-      - tcp
-      - udp
-      title: SipTransport
-    CursorPage_VNListResponse_:
+    SipTrunkCreate:
       properties:
-        data:
-          items:
-            $ref: '#/components/schemas/VNListResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[VNListResponse]
-    SipTrunkListResponse:
-      properties:
-        id:
-          type: string
-          title: Id
         name:
           type: string
+          minLength: 1
           title: Name
+        domain_name:
+          type: string
+          minLength: 1
+          title: Domain Name
+        channel_limit:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Channel Limit
+          default: 0
+        recording:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Recording
+          default: false
+        secure:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Secure
+          default: false
+        transport:
+          anyOf:
+          - $ref: '#/components/schemas/SipTransport'
+          - type: 'null'
+          description: 'SIP transport for this trunk: `tls`, `tcp`, or `udp`. If omitted, it is derived from `secure` (`secure=true`→`tls`, else `tcp`). `udp` requires `authentication_type` = `credential`.'
+        webhook_url:
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
+          title: Webhook Url
+        authentication_type:
+          $ref: '#/components/schemas/AuthenticationType'
+        auth_credential:
+          anyOf:
+          - $ref: '#/components/schemas/SipAuthCredentialInput'
+          - type: 'null'
+        auth_addresses:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/SipAuthAddressInput'
+            type: array
+          - type: 'null'
+          title: Auth Addresses
+        ip_acl_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ip Acl Id
+          description: ID of an IP access control list (`acl_...`) to authorise against, as an alternative to `auth_addresses`. Provide exactly one of the two when `authentication_type` is `IP`.
+        inbound_route:
+          anyOf:
+          - $ref: '#/components/schemas/InboundRoute'
+          - type: 'null'
+        secret_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Secret Id
+        webhook_api_version:
+          anyOf:
+          - type: string
+            enum:
+            - '2025-08-01'
+            - '2026-06-01'
+          - type: 'null'
+          title: Webhook Api Version
+      additionalProperties: false
       type: object
       required:
-      - id
       - name
-      title: SipTrunkListResponse
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
-      type: object
-      required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
-    Status:
-      type: string
-      enum:
-      - active
-      - inactive
-      title: Status
-    SipAuthCredentialInput:
-      properties:
-        username:
-          type: string
-          minLength: 5
-          title: Username
-          description: SIP authentication username
-        password:
-          type: string
-          minLength: 5
-          title: Password
-          description: SIP authentication password
-      type: object
-      required:
-      - username
-      - password
-      title: SipAuthCredentialInput
-    CursorPage_SipTrunkResponse_:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/SipTrunkResponse'
-          type: array
-          title: Data
-          description: The page of results, newest first.
-        next_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Next Cursor
-          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
-        previous_cursor:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Previous Cursor
-          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
-        has_more:
-          type: boolean
-          title: Has More
-          description: Whether more results exist after this page.
-          default: false
-      type: object
-      required:
-      - data
-      title: CursorPage[SipTrunkResponse]
+      - domain_name
+      - authentication_type
+      title: SipTrunkCreate
     ValidationFieldError:
       properties:
         loc:
@@ -409,19 +360,6 @@ components:
       - type
       title: ValidationFieldError
       description: One field-level problem within a `422` validation error.
-    DefaultResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-        message:
-          type: string
-          title: Message
-      type: object
-      required:
-      - success
-      - message
-      title: DefaultResponse
     InboundRoute:
       properties:
         name:
@@ -445,6 +383,49 @@ components:
       - name
       - sip_url
       title: InboundRoute
+    Status:
+      type: string
+      enum:
+      - active
+      - inactive
+      title: Status
+    SipAuthAddressInput:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Name
+          description: Authentication address name
+        address:
+          type: string
+          minLength: 1
+          title: Address
+          description: IP or hostname for SIP auth
+      type: object
+      required:
+      - name
+      - address
+      title: SipAuthAddressInput
+    DefaultResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - success
+      - message
+      title: DefaultResponse
+    SipTransport:
+      type: string
+      enum:
+      - tls
+      - tcp
+      - udp
+      title: SipTransport
     SipTrunkResponse:
       properties:
         id:
@@ -563,32 +544,6 @@ components:
       - is_active
       - webhook_api_version
       title: SipTrunkResponse
-    LocationResponse:
-      properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-        region_code:
-          type: string
-          title: Region Code
-        country_code:
-          type: string
-          title: Country Code
-        country_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Country Name
-      type: object
-      required:
-      - id
-      - name
-      - region_code
-      - country_code
-      title: LocationResponse
     SipTrunkUpdate:
       properties:
         name:
@@ -671,107 +626,97 @@ components:
       additionalProperties: false
       type: object
       title: SipTrunkUpdate
-    SipTrunkCreate:
+    SipAuthCredentialInput:
       properties:
-        name:
+        username:
           type: string
-          minLength: 1
-          title: Name
-        domain_name:
+          minLength: 5
+          title: Username
+          description: SIP authentication username
+        password:
           type: string
-          minLength: 1
-          title: Domain Name
-        channel_limit:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Channel Limit
-          default: 0
-        recording:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Recording
-          default: false
-        secure:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Secure
-          default: false
-        transport:
-          anyOf:
-          - $ref: '#/components/schemas/SipTransport'
-          - type: 'null'
-          description: 'SIP transport for this trunk: `tls`, `tcp`, or `udp`. If omitted, it is derived from `secure` (`secure=true`→`tls`, else `tcp`). `udp` requires `authentication_type` = `credential`.'
-        webhook_url:
-          anyOf:
-          - type: string
-            maxLength: 2083
-            minLength: 1
-            format: uri
-          - type: 'null'
-          title: Webhook Url
-        authentication_type:
-          $ref: '#/components/schemas/AuthenticationType'
-        auth_credential:
-          anyOf:
-          - $ref: '#/components/schemas/SipAuthCredentialInput'
-          - type: 'null'
-        auth_addresses:
-          anyOf:
-          - items:
-              $ref: '#/components/schemas/SipAuthAddressInput'
-            type: array
-          - type: 'null'
-          title: Auth Addresses
-        ip_acl_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Ip Acl Id
-          description: ID of an IP access control list (`acl_...`) to authorise against, as an alternative to `auth_addresses`. Provide exactly one of the two when `authentication_type` is `IP`.
-        inbound_route:
-          anyOf:
-          - $ref: '#/components/schemas/InboundRoute'
-          - type: 'null'
-        secret_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Secret Id
-        webhook_api_version:
-          anyOf:
-          - type: string
-            enum:
-            - '2025-08-01'
-            - '2026-06-01'
-          - type: 'null'
-          title: Webhook Api Version
-      additionalProperties: false
+          minLength: 5
+          title: Password
+          description: SIP authentication password
       type: object
       required:
-      - name
-      - domain_name
-      - authentication_type
-      title: SipTrunkCreate
-    SipAuthAddressInput:
+      - username
+      - password
+      title: SipAuthCredentialInput
+    AuthenticationType:
+      type: string
+      enum:
+      - credential
+      - IP
+      title: AuthenticationType
+    CallAppListResponse:
       properties:
+        id:
+          type: string
+          title: Id
         name:
           type: string
-          minLength: 1
           title: Name
-          description: Authentication address name
-        address:
-          type: string
-          minLength: 1
-          title: Address
-          description: IP or hostname for SIP auth
       type: object
       required:
+      - id
       - name
-      - address
-      title: SipAuthAddressInput
+      title: CallAppListResponse
+    LocationResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        region_code:
+          type: string
+          title: Region Code
+        country_code:
+          type: string
+          title: Country Code
+        country_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country Name
+      type: object
+      required:
+      - id
+      - name
+      - region_code
+      - country_code
+      title: LocationResponse
+    CursorPage_SipTrunkResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/SipTrunkResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[SipTrunkResponse]
     VNListResponse:
       properties:
         id:
@@ -806,13 +751,7 @@ components:
       - voice_app
       - sip_trunk
       title: VNListResponse
-    AuthenticationType:
-      type: string
-      enum:
-      - credential
-      - IP
-      title: AuthenticationType
-    CallAppListResponse:
+    SipTrunkListResponse:
       properties:
         id:
           type: string
@@ -824,7 +763,68 @@ components:
       required:
       - id
       - name
-      title: CallAppListResponse
+      title: SipTrunkListResponse
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    CursorPage_VNListResponse_:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/VNListResponse'
+          type: array
+          title: Data
+          description: The page of results, newest first.
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as `cursor_after` to fetch the next (older) page. `null` on the last page.
+        previous_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Previous Cursor
+          description: Pass as `cursor_before` to fetch the previous (newer) page. `null` on the first page.
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist after this page.
+          default: false
+      type: object
+      required:
+      - data
+      title: CursorPage[VNListResponse]
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
