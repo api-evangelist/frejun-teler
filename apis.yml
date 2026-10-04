@@ -272,6 +272,8 @@ apis:
   humanURL: https://frejun.com/docs/teler/
   baseURL: https://api.frejun.ai
   tags:
+  - voice-calls
+  tags_raw:
   - Voice / Calls
   properties:
   - type: OpenAPI
