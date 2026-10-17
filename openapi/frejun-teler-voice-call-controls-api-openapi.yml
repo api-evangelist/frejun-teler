@@ -304,78 +304,57 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ErrorResponse:
+    MutationAccepted:
+      properties:
+        request_id:
+          type: string
+          title: Request Id
+          description: Identifier for this control request. Reuse it to correlate retries and webhooks.
+        playback_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Playback Id
+          description: Identifier of the started playback (`pb_` prefix). Only returned by the play action.
+      additionalProperties: false
+      type: object
+      required:
+      - request_id
+      title: MutationAccepted
+      example:
+        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
+    ValidationErrorResponse:
       properties:
         success:
           type: boolean
           title: Success
-          description: Always `false` on an error response.
+          description: Always `false`.
           default: false
         message:
           type: string
           title: Message
-          description: Human-readable description of what went wrong. Safe to show to a user.
-        code:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Code
-          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
-        type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Type
-          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
-      type: object
-      required:
-      - message
-      title: ErrorResponse
-      description: Standard error envelope returned for all non-validation errors.
-      example:
-        message: The requested call was not found.
-        success: false
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
           type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+          title: Errors
+          description: One entry per field that failed validation.
       type: object
       required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    MuteRequest:
-      properties:
-        leg_id:
-          type: string
-          title: Leg Id
-          description: Leg to mute or unmute (`cl_` prefix).
-        'on':
-          type: boolean
-          title: 'On'
-          description: '`true` to mute the leg, `false` to unmute it.'
-      additionalProperties: false
-      type: object
-      required:
-      - leg_id
-      - 'on'
-      title: MuteRequest
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
       example:
-        leg_id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
-        'on': true
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
     PlayRequest:
       properties:
         leg_id:
@@ -415,25 +394,28 @@ components:
         loop: 1
         media_url: https://example.com/audio/greeting.wav
         on_dtmf: stop
-    MutationAccepted:
+    ValidationFieldError:
       properties:
-        request_id:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
           type: string
-          title: Request Id
-          description: Identifier for this control request. Reuse it to correlate retries and webhooks.
-        playback_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Playback Id
-          description: Identifier of the started playback (`pb_` prefix). Only returned by the play action.
-      additionalProperties: false
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
       type: object
       required:
-      - request_id
-      title: MutationAccepted
-      example:
-        request_id: req_9f8e7d6c5b4a3f2e1d0c9b8a
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
     HangupRequest:
       properties:
         leg_id:
@@ -485,38 +467,56 @@ components:
       example:
         digits: 1234#
         duration_ms: 120
-    ValidationErrorResponse:
+    ErrorResponse:
       properties:
         success:
           type: boolean
           title: Success
-          description: Always `false`.
+          description: Always `false` on an error response.
           default: false
         message:
           type: string
           title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
-          type: array
-          title: Errors
-          description: One entry per field that failed validation.
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
       type: object
       required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
       example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
+        message: The requested call was not found.
         success: false
+    MuteRequest:
+      properties:
+        leg_id:
+          type: string
+          title: Leg Id
+          description: Leg to mute or unmute (`cl_` prefix).
+        'on':
+          type: boolean
+          title: 'On'
+          description: '`true` to mute the leg, `false` to unmute it.'
+      additionalProperties: false
+      type: object
+      required:
+      - leg_id
+      - 'on'
+      title: MuteRequest
+      example:
+        leg_id: cl_01JQ8Z9K7M3N2P4R5S6T7V8WAB
+        'on': true
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

@@ -261,96 +261,19 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
 components:
   schemas:
-    ValidationFieldError:
+    SipTrunkListResponse:
       properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
+        id:
           type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    DefaultResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-        message:
-          type: string
-          title: Message
-      type: object
-      required:
-      - success
-      - message
-      title: DefaultResponse
-    UnassignVNsRequest:
-      properties:
-        vn_ids:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Vn Ids
-        apply_to_all:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Apply To All
-          default: false
-      type: object
-      title: UnassignVNsRequest
-    VNUpdate:
-      properties:
+          title: Id
         name:
-          anyOf:
-          - type: string
-            minLength: 1
-          - type: 'null'
+          type: string
           title: Name
-      additionalProperties: false
       type: object
-      title: VNUpdate
-    AssignVNsRequest:
-      properties:
-        vn_ids:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Vn Ids
-        apply_to_all:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Apply To All
-          default: false
-        voice_app_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Voice App Id
-        sip_trunk_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sip Trunk Id
-      type: object
-      title: AssignVNsRequest
+      required:
+      - id
+      - name
+      title: SipTrunkListResponse
     CallAppListResponse:
       properties:
         id:
@@ -390,6 +313,65 @@ components:
       - region_code
       - country_code
       title: LocationResponse
+    ValidationErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false`.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Always `"Validation Error"` for this response.
+          default: Validation Error
+        errors:
+          items:
+            $ref: '#/components/schemas/ValidationFieldError'
+          type: array
+          title: Errors
+          description: One entry per field that failed validation.
+      type: object
+      required:
+      - errors
+      title: ValidationErrorResponse
+      description: Returned with `422` when the request fails schema validation.
+      example:
+        errors:
+        - loc:
+          - body
+          - to_number
+          msg: String should match pattern '^\+\d{7,15}$'
+          type: string_pattern_mismatch
+        message: Validation Error
+        success: false
+    AssignVNsRequest:
+      properties:
+        vn_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Vn Ids
+        apply_to_all:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apply To All
+          default: false
+        voice_app_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Voice App Id
+        sip_trunk_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sip Trunk Id
+      type: object
+      title: AssignVNsRequest
     VNListResponse:
       properties:
         id:
@@ -424,51 +406,45 @@ components:
       - voice_app
       - sip_trunk
       title: VNListResponse
-    SipTrunkListResponse:
+    UnassignVNsRequest:
       properties:
-        id:
-          type: string
-          title: Id
-        name:
-          type: string
-          title: Name
-      type: object
-      required:
-      - id
-      - name
-      title: SipTrunkListResponse
-    ValidationErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false`.
+        vn_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Vn Ids
+        apply_to_all:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Apply To All
           default: false
-        message:
-          type: string
-          title: Message
-          description: Always `"Validation Error"` for this response.
-          default: Validation Error
-        errors:
-          items:
-            $ref: '#/components/schemas/ValidationFieldError'
+      type: object
+      title: UnassignVNsRequest
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
           type: array
-          title: Errors
-          description: One entry per field that failed validation.
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
       type: object
       required:
-      - errors
-      title: ValidationErrorResponse
-      description: Returned with `422` when the request fails schema validation.
-      example:
-        errors:
-        - loc:
-          - body
-          - to_number
-          msg: String should match pattern '^\+\d{7,15}$'
-          type: string_pattern_mismatch
-        message: Validation Error
-        success: false
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
     CursorPage_VNListResponse_:
       properties:
         data:
@@ -526,6 +502,30 @@ components:
       - number
       - location
       title: VNResponse
+    DefaultResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - success
+      - message
+      title: DefaultResponse
+    VNUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Name
+      additionalProperties: false
+      type: object
+      title: VNUpdate
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

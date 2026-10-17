@@ -74,81 +74,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    ErrorResponse:
-      properties:
-        success:
-          type: boolean
-          title: Success
-          description: Always `false` on an error response.
-          default: false
-        message:
-          type: string
-          title: Message
-          description: Human-readable description of what went wrong. Safe to show to a user.
-        code:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Code
-          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
-        type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Type
-          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
-      type: object
-      required:
-      - message
-      title: ErrorResponse
-      description: Standard error envelope returned for all non-validation errors.
-      example:
-        message: The requested call was not found.
-        success: false
-    ValidationFieldError:
-      properties:
-        loc:
-          items: {}
-          type: array
-          title: Loc
-          description: Path to the offending field, e.g. `["body", "to_number"]`.
-        msg:
-          type: string
-          title: Msg
-          description: Human-readable explanation of the problem.
-        type:
-          type: string
-          title: Type
-          description: Programmatic error type, e.g. `string_pattern_mismatch`.
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationFieldError
-      description: One field-level problem within a `422` validation error.
-    CallInitiateResponse:
-      properties:
-        message:
-          type: string
-          title: Message
-          description: Human-readable confirmation message.
-        data:
-          $ref: '#/components/schemas/CallInitiateData'
-          description: Details of the accepted call.
-      type: object
-      required:
-      - message
-      - data
-      title: CallInitiateResponse
-      example:
-        data:
-          from_number: '+14155552671'
-          id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
-          record: true
-          status_callback_url: https://yourapp.com/callback
-          to_number: '+14155559876'
-        message: Call initiated successfully
     CallInitiateData:
       properties:
         id:
@@ -214,6 +139,50 @@ components:
           type: string_pattern_mismatch
         message: Validation Error
         success: false
+    CallInitiateResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Human-readable confirmation message.
+        data:
+          $ref: '#/components/schemas/CallInitiateData'
+          description: Details of the accepted call.
+      type: object
+      required:
+      - message
+      - data
+      title: CallInitiateResponse
+      example:
+        data:
+          from_number: '+14155552671'
+          id: cs_01JQ8Z9K7M3N2P4R5S6T7V8W9X
+          record: true
+          status_callback_url: https://yourapp.com/callback
+          to_number: '+14155559876'
+        message: Call initiated successfully
+    ValidationFieldError:
+      properties:
+        loc:
+          items: {}
+          type: array
+          title: Loc
+          description: Path to the offending field, e.g. `["body", "to_number"]`.
+        msg:
+          type: string
+          title: Msg
+          description: Human-readable explanation of the problem.
+        type:
+          type: string
+          title: Type
+          description: Programmatic error type, e.g. `string_pattern_mismatch`.
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationFieldError
+      description: One field-level problem within a `422` validation error.
     CallInitiateRequest:
       properties:
         from_number:
@@ -262,6 +231,37 @@ components:
         record: true
         status_callback_url: https://yourapp.com/callback
         to_number: '+14155559876'
+    ErrorResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Always `false` on an error response.
+          default: false
+        message:
+          type: string
+          title: Message
+          description: Human-readable description of what went wrong. Safe to show to a user.
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Code
+          description: Stable, machine-readable error code. Present on business-rule errors (e.g. `transfer_in_progress`). Branch on this, not on `message`.
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+          description: Error category (e.g. `invalid_state`). Present on some conflict errors.
+      type: object
+      required:
+      - message
+      title: ErrorResponse
+      description: Standard error envelope returned for all non-validation errors.
+      example:
+        message: The requested call was not found.
+        success: false
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
