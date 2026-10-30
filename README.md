@@ -64,8 +64,136 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-FreJun Teler is a developer-first programmable voice/telephony API (CPaaS) that handles carriers, phone numbers, and real-time audio streaming so developers can connect AI models (STT/LLM/TTS) to live phone calls. It offers real-time bidirectional audio over WebSocket (L16/8000 Hz, sub-250ms latency) and programmable SIP trunking, with official Python and Node SDKs.
+FreJun Teler is a developer-first programmable voice/telephony API (CPaaS) that handles carriers, phone numbers, and real-time audio streaming so developers can connect AI models (STT/LLM/TTS) to live phone calls. It offers real-time bidirectional audio over WebSocket (L16/8000 Hz, sub-250ms latency) and programmable SIP trunking, with webhook event delivery and official Python (teler) and Node (@frejun/teler) SDKs.
 
-- **Website:** https://www.frejun.ai
-- **Documentation:** https://www.frejun.ai/docs/
-- **llms.txt:** https://www.frejun.ai/llms.txt
+**Areas:** programmable voice API · voice AI infrastructure · CPaaS · SIP Trunking · telephony API · real-time media streaming · WebSocket audio · Call Automation · conversational AI infrastructure
+
+## FreJun Teler on APIs.io
+
+Everything profiled for FreJun Teler is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/frejun-teler/](https://apis.io/providers/frejun-teler/)** — or go straight to one of the APIs or properties below.
+
+### APIs (12)
+
+- [FreJun Teler Events API](https://apis.io/apis/frejun-teler/frejun-teler-events-api/) — Inspect the webhook events Teler generated for your account and redeliver any that your endpoint missed.
+- [FreJun Teler Secrets API](https://apis.io/apis/frejun-teler/frejun-teler-secrets-api/) — Manage secret API keys used for authenticating requests. Create, rotate, and delete secrets — rotate periodically and keep them server-side.
+- [FreJun Teler SIP / Calls API](https://apis.io/apis/frejun-teler/frejun-teler-sip-calls-api/) — Read calls that arrived or left over your SIP trunks (`st_`).
+- [FreJun Teler SIP / IP Access Control Lists API](https://apis.io/apis/frejun-teler/frejun-teler-sip-ip-access-control-lists-api/) — Named sets of source IPs or CIDR networks (`acl_`) that SIP trunks with `authentication_type: IP` authorise against. Attach one to many trunks and update it…
+- [FreJun Teler SIP / Trunks API](https://apis.io/apis/frejun-teler/frejun-teler-sip-trunks-api/) — SIP trunks connect Teler to your upstream carrier or PBX. Create, configure, and manage your trunks, or inspect which virtual numbers are assigned to each one.
+- [FreJun Teler Utilities API](https://apis.io/apis/frejun-teler/frejun-teler-utilities-api/) — Fetch short-lived, signed download URLs for call recordings.
+- [FreJun Teler Virtual Numbers API](https://apis.io/apis/frejun-teler/frejun-teler-virtual-numbers-api/) — Phone numbers that Teler provisions for your account. List, assign to a voice app or SIP trunk, unassign, or update individual numbers.
+- [FreJun Teler Voice / Apps API](https://apis.io/apis/frejun-teler/frejun-teler-voice-apps-api/) — Voice apps are the configuration context for calls — they define webhook URLs, flows, and channel limits. Create and manage your voice apps here.
+- [FreJun Teler Voice / Call Controls API](https://apis.io/apis/frejun-teler/frejun-teler-voice-call-controls-api/) — Act on a live call in real time — hang up, mute, send DTMF, or play audio. These actions are accepted asynchronously and return `202` with a `request_id`.
+- [FreJun Teler Voice / Calls API](https://apis.io/apis/frejun-teler/frejun-teler-voice-calls-api/) — Place outbound calls and read call state. A **call** (`cs_`) is the top-level session; each party on it is a **leg** (`cl_`).
+- [FreJun Teler Voice / Calls (legacy) API](https://apis.io/apis/frejun-teler/frejun-teler-voice-calls-legacy-api/) — Deprecated endpoints kept for backwards compatibility. Prefer the **Voice / Calls** endpoints for all new integrations.
+- [FreJun Teler Voice / Operations API](https://apis.io/apis/frejun-teler/frejun-teler-voice-operations-api/) — Higher-level, multi-step operations on a live call, such as transferring it to a new destination.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Frejun Teler Webhooks](https://apis.io/asyncapis/frejun-teler/frejun-teler-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [frejun-teler-mcp.yml](https://apis.io/servers/frejun-teler/frejun-teler-mcp-yml/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Frejun Teler Openapi Overlay](https://apis.io/overlays/frejun-teler/frejun-teler-openapi-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Frejun Teler Authentication](https://apis.io/security/frejun-teler/frejun-teler-authentication/)
+- [Frejun Teler Domain Security](https://apis.io/security/frejun-teler/frejun-teler-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Frejun Teler Plans Pricing](https://apis.io/plans/frejun-teler/frejun-teler-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Frejun Teler Rate Limits](https://apis.io/rate-limits/frejun-teler/frejun-teler-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.frejun.ai)
+- [Documentation](https://frejun.com/docs/teler/)
+- [API reference](https://api.frejun.ai/redoc)
+- [Pricing](https://frejun.com/teler/pricing/)
+- [Sign up](https://platform.frejun.ai/signup)
+- [Blog](https://frejun.com/teler-blog/)
+- [Terms of service](https://frejun.com/terms/)
+- [Privacy policy](https://frejun.com/privacy-policy/)
+- [GitHub](https://github.com/frejun-tech)
+- [Status](https://frejun.statuspage.io)
+
+## API Evangelist rating
+
+**Kin Score 40.8** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 64.0 |
+| Contract governance | 4.5 |
+| Operational transparency | 34.2 |
+| Developer ergonomics | 45.8 |
+| Access clarity | 22.4 |
+
+**Agent readiness 49.8** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | verified |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | derived (partial credit) |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 17.5** — Telecommunications
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/frejun-teler/](https://apis.io/providers/frejun-teler/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for FreJun Teler: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/frejun-teler/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
